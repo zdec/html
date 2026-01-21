@@ -45,7 +45,7 @@ const SiteConfig = {
     // Menú de navegación
     menu: [
         { text: "Inicio", href: "index.html" },
-        { text: "Catalogo", href: "#" },
+        { text: "Catalogo", href: "catalog.html" },
         { text: "Contacto", href: "contact.html" }
     ],
     
@@ -55,7 +55,7 @@ const SiteConfig = {
             { text: "Mi Cuenta", href: "#", realhref: "my-account.html", enabled: false },
             { text: "Contacto", href: "contact.html", realhref: "contact.html", enabled: true },
             { text: "Carrito de Compras", href: "#", realhref: "cart.html", enabled: false },
-            { text: "Catalogo", href: "#", realhref: "shop-left-sidebar.html", enabled: true }
+            { text: "Catalogo", href: "catalog.html", realhref: "catalog.html", enabled: true }
         ],
         copyright: {
             year: "2026",
