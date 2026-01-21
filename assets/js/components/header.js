@@ -1,0 +1,141 @@
+/**
+ * Header Component
+ * Componente reutilizable para el header del sitio
+ */
+function loadHeader() {
+    const headerHTML = `
+        <header>
+            <!-- Header top area start -->
+            <div class="header-top">
+                <div class="container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col">
+                            <div class="welcome-text">
+                                <p>${SiteConfig.texts.welcomeMessage}</p>
+                            </div>
+                        </div>
+                        <div class="col d-none d-lg-block">
+                            <div class="top-nav">
+                                <ul>
+                                    <li><a href="tel:${SiteConfig.contact.phoneFormatted.replace(/\s/g, '')}"><i class="fa fa-phone"></i> ${SiteConfig.contact.phone}</a></li>
+                                    <li><a href="mailto:${SiteConfig.contact.email}"><i class="fa fa-envelope-o"></i> ${SiteConfig.contact.email}</a></li>
+                                    <li><a href="#" realref="my-account.html"><i class="fa fa-user"></i> ${SiteConfig.texts.accountText}</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Header top area end -->
+            <!-- Header action area start -->
+            <div class="header-bottom  d-none d-lg-block">
+                <div class="container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-lg-3 col">
+                            <div class="header-logo">
+                                <a href="index.html"><img src="${SiteConfig.images.logo}" alt="IT Secur Logo" /></a>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="search-element">
+                                <form action="#">
+                                    <input type="text" placeholder="Buscar producto" />
+                                    <button><i class="pe-7s-search"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col">
+                            <div class="header-actions">
+                                <!-- Single Wedge Start -->
+                                <a href="#offcanvas-wishlist" class="header-action-btn offcanvas-toggle">
+                                    <i class="pe-7s-like"></i>
+                                </a>
+                                <!-- Single Wedge End -->
+                                <a href="#" realhref="#offcanvas-cart" class="header-action-btn header-action-btn-cart pr-0">
+                                    <i class="pe-7s-shopbag"></i>
+                                    <span class="header-action-num">0</span>
+                                </a>
+                                <a href="#offcanvas-mobile-menu" class="header-action-btn header-action-btn-menu offcanvas-toggle d-lg-none">
+                                    <i class="pe-7s-menu"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Header action area end -->
+            <!-- Header action area start -->
+            <div class="header-bottom d-lg-none sticky-nav style-1">
+                <div class="container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-lg-3 col">
+                            <div class="header-logo">
+                                <a href="index.html"><img src="${SiteConfig.images.logo}" alt="Site Logo" /></a>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 d-none d-lg-block">
+                            <div class="search-element">
+                                <form action="#">
+                                    <input type="text" placeholder="Buscar Producto" />
+                                    <button><i class="pe-7s-search"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col">
+                            <div class="header-actions">
+                                <!-- Single Wedge Start -->
+                                <a href="#offcanvas-wishlist" class="header-action-btn offcanvas-toggle">
+                                    <i class="pe-7s-like"></i>
+                                </a>
+                                <!-- Single Wedge End -->
+                                <a href="#" realhref="#offcanvas-cart" class="header-action-btn header-action-btn-cart offcanvas-toggle pr-0">
+                                    <i class="pe-7s-shopbag"></i>
+                                    <span class="header-action-num">01</span>
+                                </a>
+                                <a href="#offcanvas-mobile-menu" class="header-action-btn header-action-btn-menu offcanvas-toggle d-lg-none">
+                                    <i class="pe-7s-menu"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Header action area end -->
+            <!-- header navigation area start -->
+            <div class="header-nav-area d-none d-lg-block sticky-nav">
+                <div class="container">
+                    <div class="header-nav">
+                        <div class="main-menu position-relative">
+                            <ul>
+                                ${SiteConfig.menu.map(item => 
+                                    `<li><a href="${item.href}">${item.text}</a></li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- header navigation area end -->
+            <div class="mobile-search-box d-lg-none">
+                <div class="container">
+                    <!-- mobile search start -->
+                    <div class="search-element max-width-100">
+                        <form action="#">
+                            <input type="text" placeholder="Buscar Producto" />
+                            <button><i class="pe-7s-search"></i></button>
+                        </form>
+                    </div>
+                    <!-- mobile search start -->
+                </div>
+            </div>
+        </header>
+    `;
+    
+    // Insertar el header al inicio del main-wrapper
+    const mainWrapper = document.querySelector('.main-wrapper');
+    if (mainWrapper) {
+        mainWrapper.insertAdjacentHTML('afterbegin', headerHTML);
+    } else {
+        console.error('No se encontró .main-wrapper para insertar el header');
+    }
+}
