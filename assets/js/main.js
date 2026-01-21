@@ -107,21 +107,28 @@
     /*---------------------
         Hero Slider
      ---------------------- */
-
-    var heroSlider = new Swiper('.hero-slider.swiper-container', {
-        loop: true,
-        speed: 2000,
-        effect: "fade",
-        autoplay: {
-            delay: 7000,
-            disableOnInteraction: false,
-        },
-        // Navigation arrows
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        }
-    });
+    // Verificar si el elemento existe antes de inicializar (para componentes dinámicos)
+    var heroSliderElement = document.querySelector('.hero-slider.swiper-container');
+    if (heroSliderElement && typeof Swiper !== 'undefined') {
+        var heroSlider = new Swiper('.hero-slider.swiper-container', {
+            loop: true,
+            speed: 2000,
+            effect: "fade",
+            autoplay: {
+                delay: 7000,
+                disableOnInteraction: false,
+            },
+            // Navigation arrows
+            navigation: {
+                nextEl: '.hero-slider .swiper-button-next',
+                prevEl: '.hero-slider .swiper-button-prev',
+            },
+            pagination: {
+                el: '.hero-slider .swiper-pagination',
+                clickable: true,
+            }
+        });
+    }
 
 
 
@@ -164,41 +171,44 @@
     /*---------------------------
         Testimonial Slider 
     ------------------------------ */
+    // Verificar si el elemento existe antes de inicializar (para componentes dinámicos)
+    var testiSliderElement = document.querySelector('.content-top.swiper-container');
+    if (testiSliderElement && typeof Swiper !== 'undefined') {
+        var testiSlider = new Swiper('.content-top', {
+            slidesPerView: 2,
+            spaceBetween: 30,
+            speed: 1500,
+            loop: true,
 
-    var testiSlider = new Swiper('.content-top', {
-        slidesPerView: 2,
-        spaceBetween: 30,
-        speed: 1500,
-        loop: true,
+            // Navigation arrows
 
-        // Navigation arrows
+            navigation: {
+                nextEl: ".content-top .swiper-button-next",
+                prevEl: ".content-top .swiper-button-prev",
+            },
 
-        navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
-        },
-
-        breakpoints: {
-            0: {
-                slidesPerView: 1,
+            breakpoints: {
+                0: {
+                    slidesPerView: 1,
+                },
+                478: {
+                    slidesPerView: 1,
+                },
+                576: {
+                    slidesPerView: 1,
+                },
+                768: {
+                    slidesPerView: 2,
+                },
+                992: {
+                    slidesPerView: 2,
+                },
+                1200: {
+                    slidesPerView: 2,
+                },
             },
-            478: {
-                slidesPerView: 1,
-            },
-            576: {
-                slidesPerView: 1,
-            },
-            768: {
-                slidesPerView: 2,
-            },
-            992: {
-                slidesPerView: 2,
-            },
-            1200: {
-                slidesPerView: 2,
-            },
-        },
-    });
+        });
+    }
 
     /*-------------------------------
         Feature Product Slider
@@ -484,33 +494,37 @@
     /*---------------------------
             Brand Logo
       ------------------------------ */
-    var companyLogoSlider = new Swiper('.brand-slider.swiper-container', {
-        slidesPerView: 4,
-        speed: 1500,
-        loop: true,
-        autoplay: {
-            delay: 2000,
-            disableOnInteraction: false,
-        },
-        breakpoints: {
+    // Verificar si el elemento existe antes de inicializar (para componentes dinámicos)
+    var brandSliderElement = document.querySelector('.brand-slider.swiper-container');
+    if (brandSliderElement && typeof Swiper !== 'undefined') {
+        var companyLogoSlider = new Swiper('.brand-slider.swiper-container', {
+            slidesPerView: 4,
+            speed: 1500,
+            loop: true,
+            autoplay: {
+                delay: 2000,
+                disableOnInteraction: false,
+            },
+            breakpoints: {
 
-            0: {
-                slidesPerView: 1,
-            },
-            480: {
-                slidesPerView: 2,
-            },
-            768: {
-                slidesPerView: 2,
-            },
-            992: {
-                slidesPerView: 3,
-            },
-            1200: {
-                slidesPerView: 4,
-            },
-        }
-    });
+                0: {
+                    slidesPerView: 1,
+                },
+                480: {
+                    slidesPerView: 2,
+                },
+                768: {
+                    slidesPerView: 2,
+                },
+                992: {
+                    slidesPerView: 3,
+                },
+                1200: {
+                    slidesPerView: 4,
+                },
+            }
+        });
+    }
 
     /*---------------------
         venobox

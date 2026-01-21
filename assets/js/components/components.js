@@ -13,16 +13,28 @@ if (typeof SiteConfig === 'undefined') {
  * @param {Object} options - Opciones de carga
  * @param {boolean} options.loadModals - Si se deben cargar los modales (default: true)
  * @param {boolean} options.loadScripts - Si se deben cargar los scripts (default: false, ya que normalmente están en el HTML)
+ * @param {boolean} options.loadHeroSlider - Si se debe cargar el hero slider (default: false, solo en index)
+ * @param {boolean} options.loadBannerArea - Si se debe cargar el banner area (default: false, solo en index)
+ * @param {boolean} options.loadTestimonialArea - Si se debe cargar el testimonial area (default: false, solo en index)
+ * @param {boolean} options.loadBrandArea - Si se debe cargar el brand area (default: false, solo en index)
+ * @param {boolean} options.loadContactArea - Si se debe cargar el contact area (default: false, solo en contact)
+ * @param {boolean} options.loadMapArea - Si se debe cargar el map area (default: false, solo en contact)
  */
 function loadAllComponents(options = {}) {
     const defaults = {
         loadModals: true,
-        loadScripts: false // Por defecto false porque los scripts ya están en el HTML
+        loadScripts: false, // Por defecto false porque los scripts ya están en el HTML
+        loadHeroSlider: false,
+        loadBannerArea: false,
+        loadTestimonialArea: false,
+        loadBrandArea: false,
+        loadContactArea: false,
+        loadMapArea: false
     };
     
     const config = Object.assign({}, defaults, options);
     
-    // Cargar componentes en orden
+    // Cargar componentes comunes en orden
     if (typeof loadHeader === 'function') {
         loadHeader();
     }
@@ -39,6 +51,32 @@ function loadAllComponents(options = {}) {
         loadModals();
     }
     
+    // Componentes específicos de la página de inicio
+    if (config.loadHeroSlider && typeof loadHeroSlider === 'function') {
+        loadHeroSlider();
+    }
+    
+    if (config.loadBannerArea && typeof loadBannerArea === 'function') {
+        loadBannerArea();
+    }
+    
+    if (config.loadTestimonialArea && typeof loadTestimonialArea === 'function') {
+        loadTestimonialArea();
+    }
+    
+    if (config.loadBrandArea && typeof loadBrandArea === 'function') {
+        loadBrandArea();
+    }
+    
+    // Componentes específicos de la página de contacto
+    if (config.loadContactArea && typeof loadContactArea === 'function') {
+        loadContactArea();
+    }
+    
+    if (config.loadMapArea && typeof loadMapArea === 'function') {
+        loadMapArea();
+    }
+    
     // Los scripts normalmente no se cargan dinámicamente porque ya están en el HTML
     // Pero se puede activar si es necesario
     if (config.loadScripts && typeof loadScripts === 'function') {
@@ -49,16 +87,36 @@ function loadAllComponents(options = {}) {
     if (typeof jQuery !== 'undefined') {
         jQuery(document).trigger('componentsLoaded');
     }
-    
-    console.log('✅ Componentes cargados correctamente');
 }
 
 /**
  * Inicializar componentes cuando el DOM esté listo
  */
+function initComponents() {
+    // Detectar en qué página estamos para cargar componentes específicos
+    const pathname = window.location.pathname;
+    const isIndexPage = pathname.endsWith('index.html') || 
+                        pathname.endsWith('/') || 
+                        pathname === '/';
+    const isContactPage = pathname.endsWith('contact.html');
+    
+    const options = {
+        loadModals: isIndexPage, // Solo cargar modales en index (páginas con productos)
+        loadScripts: false,
+        loadHeroSlider: isIndexPage,
+        loadBannerArea: isIndexPage,
+        loadTestimonialArea: isIndexPage,
+        loadBrandArea: isIndexPage,
+        loadContactArea: isContactPage,
+        loadMapArea: isContactPage
+    };
+    
+    loadAllComponents(options);
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadAllComponents);
+    document.addEventListener('DOMContentLoaded', initComponents);
 } else {
     // DOM ya está listo
-    loadAllComponents();
+    initComponents();
 }
