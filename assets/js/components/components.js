@@ -113,9 +113,10 @@ function initComponents() {
                         pathname === '/';
     const isContactPage = pathname.endsWith('contact.html');
     const isSingleProductPage = pathname.endsWith('single-product.html');
+    const isCatalogPage = pathname.endsWith('catalog.html');
     
     const options = {
-        loadModals: isIndexPage || isSingleProductPage, // Cargar modales en index y single-product (páginas con productos)
+        loadModals: isIndexPage || isSingleProductPage || isCatalogPage, // Cargar modales en index, single-product y catalog (páginas con productos)
         loadScripts: false,
         loadHeroSlider: isIndexPage,
         loadBannerArea: isIndexPage,
