@@ -19,6 +19,8 @@ if (typeof SiteConfig === 'undefined') {
  * @param {boolean} options.loadBrandArea - Si se debe cargar el brand area (default: false, solo en index)
  * @param {boolean} options.loadContactArea - Si se debe cargar el contact area (default: false, solo en contact)
  * @param {boolean} options.loadMapArea - Si se debe cargar el map area (default: false, solo en contact)
+ * @param {boolean} options.loadProductDetailsArea - Si se debe cargar el product details area (default: false, solo en single-product)
+ * @param {boolean} options.loadProductArea - Si se debe cargar el product area (default: false, solo en single-product)
  */
 function loadAllComponents(options = {}) {
     const defaults = {
@@ -29,7 +31,9 @@ function loadAllComponents(options = {}) {
         loadTestimonialArea: false,
         loadBrandArea: false,
         loadContactArea: false,
-        loadMapArea: false
+        loadMapArea: false,
+        loadProductDetailsArea: false,
+        loadProductArea: false
     };
     
     const config = Object.assign({}, defaults, options);
@@ -77,6 +81,15 @@ function loadAllComponents(options = {}) {
         loadMapArea();
     }
     
+    // Componentes específicos de la página de detalle de producto
+    if (config.loadProductDetailsArea && typeof loadProductDetailsArea === 'function') {
+        loadProductDetailsArea();
+    }
+    
+    if (config.loadProductArea && typeof loadProductArea === 'function') {
+        loadProductArea();
+    }
+    
     // Los scripts normalmente no se cargan dinámicamente porque ya están en el HTML
     // Pero se puede activar si es necesario
     if (config.loadScripts && typeof loadScripts === 'function') {
@@ -99,16 +112,19 @@ function initComponents() {
                         pathname.endsWith('/') || 
                         pathname === '/';
     const isContactPage = pathname.endsWith('contact.html');
+    const isSingleProductPage = pathname.endsWith('single-product.html');
     
     const options = {
-        loadModals: isIndexPage, // Solo cargar modales en index (páginas con productos)
+        loadModals: isIndexPage || isSingleProductPage, // Cargar modales en index y single-product (páginas con productos)
         loadScripts: false,
         loadHeroSlider: isIndexPage,
         loadBannerArea: isIndexPage,
         loadTestimonialArea: isIndexPage,
         loadBrandArea: isIndexPage,
         loadContactArea: isContactPage,
-        loadMapArea: isContactPage
+        loadMapArea: isContactPage,
+        loadProductDetailsArea: isSingleProductPage,
+        loadProductArea: isSingleProductPage
     };
     
     loadAllComponents(options);
