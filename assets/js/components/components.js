@@ -17,6 +17,7 @@ if (typeof SiteConfig === 'undefined') {
  * @param {boolean} options.loadBannerArea - Si se debe cargar el banner area (default: false, solo en index)
  * @param {boolean} options.loadTestimonialArea - Si se debe cargar el testimonial area (default: false, solo en index)
  * @param {boolean} options.loadBrandArea - Si se debe cargar el brand area (default: false, solo en index)
+ * @param {boolean} options.loadIndexProductArea - Si se debe cargar el product area de index (default: false, solo en index)
  * @param {boolean} options.loadContactArea - Si se debe cargar el contact area (default: false, solo en contact)
  * @param {boolean} options.loadMapArea - Si se debe cargar el map area (default: false, solo en contact)
  * @param {boolean} options.loadProductDetailsArea - Si se debe cargar el product details area (default: false, solo en single-product)
@@ -31,6 +32,7 @@ function loadAllComponents(options = {}) {
         loadBannerArea: false,
         loadTestimonialArea: false,
         loadBrandArea: false,
+        loadIndexProductArea: false,
         loadContactArea: false,
         loadMapArea: false,
         loadProductDetailsArea: false,
@@ -72,6 +74,10 @@ function loadAllComponents(options = {}) {
     
     if (config.loadBrandArea && typeof loadBrandArea === 'function') {
         loadBrandArea();
+    }
+    
+    if (config.loadIndexProductArea && typeof loadIndexProductArea === 'function') {
+        loadIndexProductArea();
     }
     
     // Componentes específicos de la página de contacto
@@ -129,6 +135,7 @@ function initComponents() {
         loadBannerArea: isIndexPage,
         loadTestimonialArea: isIndexPage,
         loadBrandArea: isIndexPage,
+        loadIndexProductArea: isIndexPage,
         loadContactArea: isContactPage,
         loadMapArea: isContactPage,
         loadProductDetailsArea: isSingleProductPage,
