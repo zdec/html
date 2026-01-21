@@ -47,10 +47,10 @@ const SiteConfig = {
     // Footer links
     footer: {
         services: [
-            { text: "Mi Cuenta", href: "#", realhref: "my-account.html" },
-            { text: "Contacto", href: "#", realhref: "contact.html" },
-            { text: "Carrito de Compras", href: "#", realhref: "cart.html" },
-            { text: "Catalogo", href: "#", realhref: "shop-left-sidebar.html" }
+            { text: "Mi Cuenta", href: "#", realhref: "my-account.html", enabled: false },
+            { text: "Contacto", href: "contact.html", realhref: "contact.html", enabled: true },
+            { text: "Carrito de Compras", href: "#", realhref: "cart.html", enabled: false },
+            { text: "Catalogo", href: "#", realhref: "shop-left-sidebar.html", enabled: true }
         ],
         copyright: {
             year: "2026",

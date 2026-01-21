@@ -22,12 +22,28 @@ function loadFooter() {
             socialTumblr: SiteConfig.social.tumblr || '#',
             socialTwitter: SiteConfig.social.twitter || '#',
             socialInstagram: SiteConfig.social.instagram || '#',
-            footerServices: SiteConfig.footer.services ? SiteConfig.footer.services.map(service => 
-                `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
-            ).join('') : '',
-            footerMyAccount: SiteConfig.footer.services ? SiteConfig.footer.services.map(service => 
-                `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
-            ).join('') : '',
+            footerServices: (() => {
+                if (!SiteConfig.footer.services) return '';
+                // Filtrar solo los servicios habilitados (enabled: true o undefined)
+                // Excluir explícitamente los que tienen enabled: false
+                const enabledServices = SiteConfig.footer.services.filter(service => {
+                    return service.enabled === true || service.enabled === undefined;
+                });
+                return enabledServices.map(service => 
+                    `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
+                ).join('');
+            })(),
+            footerMyAccount: (() => {
+                if (!SiteConfig.footer.services) return '';
+                // Filtrar solo los servicios habilitados (enabled: true o undefined)
+                // Excluir explícitamente los que tienen enabled: false
+                const enabledServices = SiteConfig.footer.services.filter(service => {
+                    return service.enabled === true || service.enabled === undefined;
+                });
+                return enabledServices.map(service => 
+                    `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
+                ).join('');
+            })(),
             contactAddress: SiteConfig.contact.address || '',
             phone: SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '',
             phoneClean: (SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '').replace(/\s/g, ''),
