@@ -1,4 +1,51 @@
 /**
+ * Inicializa los event listeners para los offcanvas
+ * Esta función debe llamarse después de que los elementos offcanvas se inserten en el DOM
+ */
+function initOffcanvasListeners() {
+    // Verificar que jQuery esté disponible
+    if (typeof jQuery === 'undefined') {
+        console.warn('jQuery no está disponible. Los offcanvas pueden no funcionar correctamente.');
+        return;
+    }
+    
+    var $ = jQuery;
+    var $body = $('body');
+    var $offCanvasToggle = $(".offcanvas-toggle");
+    var $offCanvas = $(".offcanvas");
+    var $offCanvasOverlay = $(".offcanvas-overlay");
+    var $mobileMenuToggle = $(".mobile-menu-toggle");
+    
+    // Remover listeners anteriores para evitar duplicados
+    $offCanvasToggle.off('click.offcanvas');
+    $(".offcanvas-close, .offcanvas-overlay").off('click.offcanvas');
+    
+    // Agregar listeners para abrir offcanvas
+    $offCanvasToggle.on("click.offcanvas", function(e) {
+        e.preventDefault();
+        var $this = $(this),
+            $target = $this.attr("href");
+        if ($target) {
+            $body.addClass("offcanvas-open");
+            $($target).addClass("offcanvas-open");
+            $offCanvasOverlay.fadeIn();
+            if ($this.parent().hasClass("mobile-menu-toggle")) {
+                $this.addClass("close");
+            }
+        }
+    });
+    
+    // Agregar listeners para cerrar offcanvas
+    $(".offcanvas-close, .offcanvas-overlay").on("click.offcanvas", function(e) {
+        e.preventDefault();
+        $body.removeClass("offcanvas-open");
+        $offCanvas.removeClass("offcanvas-open");
+        $offCanvasOverlay.fadeOut();
+        $mobileMenuToggle.find("a").removeClass("close");
+    });
+}
+
+/**
  * Offcanvas Components
  * Componentes reutilizables para los sidebars (wishlist, cart, mobile menu)
  * Carga el HTML desde offcanvas.html y reemplaza los placeholders con datos de SiteConfig
@@ -50,7 +97,32 @@ function loadOffcanvas() {
                 mainWrapper.insertAdjacentHTML('afterbegin', processedHTML);
             } else {
                 console.error('No se encontró lugar para insertar los offcanvas');
+                return;
             }
+        }
+        
+        // Inicializar los event listeners del offcanvas después de insertar el HTML
+        // Esperar a que jQuery esté disponible si aún no lo está
+        if (typeof jQuery !== 'undefined') {
+            initOffcanvasListeners();
+        } else {
+            // Si jQuery no está disponible aún, esperar a que se cargue
+            var checkJQuery = setInterval(function() {
+                if (typeof jQuery !== 'undefined') {
+                    clearInterval(checkJQuery);
+                    initOffcanvasListeners();
+                }
+            }, 50);
+            
+            // Timeout de seguridad después de 2 segundos
+            setTimeout(function() {
+                clearInterval(checkJQuery);
+                if (typeof jQuery !== 'undefined') {
+                    initOffcanvasListeners();
+                } else {
+                    console.error('jQuery no está disponible después de 2 segundos. Los offcanvas pueden no funcionar.');
+                }
+            }, 2000);
         }
     }
     
