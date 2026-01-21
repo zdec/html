@@ -28,6 +28,11 @@ const SiteConfig = {
         wishlistText: "Me gusta"
     },
     
+    // Configuración de elementos del header
+    header: {
+        showCart: false  // Mostrar/ocultar botón del carrito
+    },
+    
     // Redes sociales
     social: {
         facebook: "#",

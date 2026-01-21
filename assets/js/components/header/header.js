@@ -16,6 +16,9 @@ function loadHeader() {
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
         // Preparar los datos para reemplazar los placeholders
+        // Verificar si se debe mostrar el botón del carrito (por defecto false si no está configurado)
+        const showCart = SiteConfig.header && SiteConfig.header.showCart === true;
+        
         const data = {
             welcomeMessage: SiteConfig.texts.welcomeMessage || '',
             phone: SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '',
@@ -25,15 +28,29 @@ function loadHeader() {
             logo: SiteConfig.images.logo || 'assets/images/logo/logo.png',
             menuItems: SiteConfig.menu ? SiteConfig.menu.map(item => 
                 `<li><a href="${item.href}">${item.text}</a></li>`
-            ).join('') : ''
+            ).join('') : '',
+            cartButton: showCart ? 
+                `<a href="#" realhref="#offcanvas-cart" class="header-action-btn header-action-btn-cart pr-0">
+                    <i class="pe-7s-shopbag"></i>
+                    <span class="header-action-num">0</span>
+                </a>` : '',
+            cartButtonMobile: showCart ? 
+                `<a href="#" realhref="#offcanvas-cart" class="header-action-btn header-action-btn-cart offcanvas-toggle pr-0">
+                    <i class="pe-7s-shopbag"></i>
+                    <span class="header-action-num">01</span>
+                </a>` : ''
         };
         
         // Reemplazar los placeholders con los datos
         let processedHTML = html;
         Object.keys(data).forEach(key => {
             const placeholder = new RegExp(`{{${key}}}`, 'g');
-            processedHTML = processedHTML.replace(placeholder, data[key]);
+            const value = data[key] || ''; // Asegurar que siempre haya un valor (aunque sea vacío)
+            processedHTML = processedHTML.replace(placeholder, value);
         });
+        
+        // Verificar que no queden placeholders sin reemplazar y limpiarlos
+        processedHTML = processedHTML.replace(/{{[^}]+}}/g, '');
         
         // Insertar el header al inicio del main-wrapper
         const mainWrapper = document.querySelector('.main-wrapper');
