@@ -21,6 +21,7 @@ if (typeof SiteConfig === 'undefined') {
  * @param {boolean} options.loadMapArea - Si se debe cargar el map area (default: false, solo en contact)
  * @param {boolean} options.loadProductDetailsArea - Si se debe cargar el product details area (default: false, solo en single-product)
  * @param {boolean} options.loadProductArea - Si se debe cargar el product area (default: false, solo en single-product)
+ * @param {boolean} options.loadShopPage - Si se debe cargar el shop page (default: false, solo en catalog)
  */
 function loadAllComponents(options = {}) {
     const defaults = {
@@ -33,7 +34,8 @@ function loadAllComponents(options = {}) {
         loadContactArea: false,
         loadMapArea: false,
         loadProductDetailsArea: false,
-        loadProductArea: false
+        loadProductArea: false,
+        loadShopPage: false
     };
     
     const config = Object.assign({}, defaults, options);
@@ -90,6 +92,11 @@ function loadAllComponents(options = {}) {
         loadProductArea();
     }
     
+    // Componentes específicos de la página de catálogo
+    if (config.loadShopPage && typeof loadShopPage === 'function') {
+        loadShopPage();
+    }
+    
     // Los scripts normalmente no se cargan dinámicamente porque ya están en el HTML
     // Pero se puede activar si es necesario
     if (config.loadScripts && typeof loadScripts === 'function') {
@@ -125,7 +132,8 @@ function initComponents() {
         loadContactArea: isContactPage,
         loadMapArea: isContactPage,
         loadProductDetailsArea: isSingleProductPage,
-        loadProductArea: isSingleProductPage
+        loadProductArea: isSingleProductPage,
+        loadShopPage: isCatalogPage
     };
     
     loadAllComponents(options);
