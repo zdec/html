@@ -1,0 +1,67 @@
+<!-- Contact Area Start -->
+<div class="contact-area">
+    <div class="container">
+        <div class="contact-wrapper">
+            <div class="row">
+                <div class="col-12">
+                    <div class="contact-form">
+                        <div class="contact-title mb-30">
+                            <h2 class="title">Enviar una solicitud</h2>
+                        </div>
+                        <form class="contact-form-style" id="contact-form" action="https://whizthemes.com/nazmul/php/mail.php" method="post">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <input name="name" placeholder="Nombre*" type="text" />
+                                </div>
+                                <div class="col-lg-6">
+                                    <input name="email" placeholder="Email*" type="email" />
+                                </div>
+                                <div class="col-lg-12">
+                                    <input name="subject" placeholder="Asunto*" type="text" />
+                                </div>
+                                <div class="col-lg-12 text-center">
+                                    <textarea name="message" placeholder="Mensaje*"></textarea>
+                                    <button class="btn btn-primary" type="submit">Enviar</button>
+                                </div>
+                            </div>
+                        </form>
+                        <p class="form-messege"></p>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="contact-info">
+                        <div class="single-contact">
+                            <div class="icon-box">
+                                <img src="assets/images/icons/contact-1.png" alt="">
+                            </div>
+                            <div class="info-box">
+                                <h5 class="title">Direccion</h5>
+                                <p>{{address}}</p>
+                            </div>
+                        </div>
+                        <div class="single-contact">
+                            <div class="icon-box">
+                                <img src="assets/images/icons/contact-2.png" alt="">
+                            </div>
+                            <div class="info-box">
+                                <h5 class="title">Contacto</h5>
+                                <p><a href="tel:{{phoneClean}}">{{phone}}</a></p>
+                            </div>
+                        </div>
+                        <div class="single-contact m-0">
+                            <div class="icon-box">
+                                <img src="assets/images/icons/contact-3.png" alt="">
+                            </div>
+                            <div class="info-box">
+                                <h5 class="title">Email/Web</h5>
+                                <p><a href="mailto:{{email}}">{{email}}</a></p>
+                                <p><a href="{{web}}" target="_blank">{{webDisplay}}</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Contact Area End -->
