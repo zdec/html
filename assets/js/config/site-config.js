@@ -72,9 +72,9 @@ const SiteConfig = {
             {
                 id: 1,
                 image: "assets/images/product-image/1/1.webp",
-                alt: "Antena Satelital",
+                alt: "Antena Starlink",
                 category: "Comunicacion",
-                title: "Antena Satelital",
+                title: "Antena Starlink",
                 price: "$9.800",
                 oldPrice: null,
                 badges: ["new"],
