@@ -165,10 +165,67 @@ function loadIndexProductArea() {
             `;
         }
         
-        // Función para ordenar productos por un campo específico
+        /**
+         * Normaliza el orden de productos calculando automáticamente valores faltantes
+         * @param {Array} products - Array de productos
+         * @param {string} orderField - Campo de ordenamiento ('orderNewArrivals' o 'orderTopRated')
+         * @returns {Array} - Array de productos con orden normalizado
+         */
+        function normalizeProductOrder(products, orderField) {
+            // Crear copia de productos para no modificar el original
+            const normalizedProducts = products.map((product, index) => {
+                // Si el campo de orden no existe, calcularlo automáticamente
+                if (product[orderField] === undefined || product[orderField] === null) {
+                    let calculatedOrder;
+                    
+                    if (orderField === 'orderNewArrivals') {
+                        // Para novedades: productos con badge "new" primero, luego por id descendente
+                        const hasNewBadge = product.badges && product.badges.some(badge => {
+                            if (typeof badge === 'string') return badge === 'new';
+                            if (typeof badge === 'object' && badge.type) return badge.type === 'new';
+                            return false;
+                        });
+                        
+                        if (hasNewBadge) {
+                            // Productos con badge "new" van primero (orden 1-999)
+                            calculatedOrder = 1000 - product.id; // Id más alto = orden más bajo (aparece primero)
+                        } else {
+                            // Productos sin badge "new" van después (orden 1000+)
+                            calculatedOrder = 2000 - product.id;
+                        }
+                    } else if (orderField === 'orderTopRated') {
+                        // Para más vendidos: ordenar por precio (más caro primero), luego por id
+                        const priceValue = parseFloat((product.price || '0').replace(/[^0-9.]/g, '')) || 0;
+                        // Invertir el precio para que los más caros tengan orden más bajo
+                        calculatedOrder = 10000 - priceValue - (product.id * 0.01);
+                    } else {
+                        // Fallback: usar id
+                        calculatedOrder = product.id || index + 1;
+                    }
+                    
+                    return { ...product, [orderField]: calculatedOrder };
+                }
+                return product;
+            });
+            
+            return normalizedProducts;
+        }
+        
+        /**
+         * Ordena productos por un campo específico
+         * @param {Array} products - Array de productos
+         * @param {string} orderField - Campo de ordenamiento
+         * @returns {Array} - Array de productos ordenado
+         */
         function sortProductsByOrder(products, orderField) {
-            return [...products].sort((a, b) => {
-                return (a[orderField] || 999) - (b[orderField] || 999);
+            // Normalizar productos primero (calcular valores faltantes)
+            const normalizedProducts = normalizeProductOrder(products, orderField);
+            
+            // Ordenar por el campo especificado
+            return normalizedProducts.sort((a, b) => {
+                const orderA = a[orderField] || 9999;
+                const orderB = b[orderField] || 9999;
+                return orderA - orderB;
             });
         }
         
