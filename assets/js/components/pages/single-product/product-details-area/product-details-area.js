@@ -255,16 +255,16 @@ function loadProductDetailsArea() {
         if (informationElement && product.information) {
             let infoHTML = '<ul>';
             if (product.information.weight) {
-                infoHTML += `<li><span>Weight</span> ${product.information.weight}</li>`;
+                infoHTML += `<li><span>Peso</span> ${product.information.weight}</li>`;
             }
             if (product.information.dimensions) {
-                infoHTML += `<li><span>Dimensions</span> ${product.information.dimensions}</li>`;
+                infoHTML += `<li><span>Dimensiones</span> ${product.information.dimensions}</li>`;
             }
             if (product.information.materials) {
-                infoHTML += `<li><span>Materials</span> ${product.information.materials}</li>`;
+                infoHTML += `<li><span>Materiales</span> ${product.information.materials}</li>`;
             }
             if (product.information.other_info) {
-                infoHTML += `<li><span>Other Info</span> ${product.information.other_info}</li>`;
+                infoHTML += `<li><span>Otra Información</span> ${product.information.other_info}</li>`;
             }
             infoHTML += '</ul>';
             informationElement.innerHTML = infoHTML;
