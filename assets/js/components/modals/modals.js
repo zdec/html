@@ -140,6 +140,16 @@ function loadModals() {
             skuElement.innerHTML = `<li><a href="#">${product.sku || 'N/A'}</a></li>`;
         }
         
+        // Actualizar la disponibilidad
+        const availabilityElement = document.getElementById('quickview-availability');
+        if (availabilityElement) {
+            const availabilityDays = product.availability || 0;
+            const availabilityText = availabilityDays > 0 
+                ? `${availabilityDays} ${availabilityDays === 1 ? 'día' : 'días'}` 
+                : 'No disponible';
+            availabilityElement.innerHTML = `<li><a href="#">${availabilityText}</a></li>`;
+        }
+        
         // Actualizar la categoría
         const categoryElement = document.getElementById('quickview-category');
         if (categoryElement) {

@@ -83,6 +83,7 @@ const SiteConfig = {
                 orderTopRated: 3,    // Orden en tab "Mas Vendidos"
                 description: "Starlink Maritime es la solución de internet satelital diseñada especialmente para embarcaciones y operaciones marítimas que requieren conectividad confiable, rápida y global sin importar dónde se encuentren en los océanos del mundo. Aprovechando la más grande constelación de satélites en órbita terrestre baja, Starlink ofrece acceso continuo a internet incluso en aguas internacionales, ideal para barcos comerciales, pesca, investigación y yates privados.",
                 sku: "SKU-ANT-001",
+                availability: 15,  // Disponibilidad en días
                 tags: ["satelital", "comunicacion", "antena", "exterior"],
                 information: {
                     weight: "2.5 kg",
@@ -105,6 +106,7 @@ const SiteConfig = {
                 orderTopRated: 1,
                 description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
                 sku: "SKU-TEL-002",
+                availability: 8,  // Disponibilidad en días
                 tags: ["telefono", "satelital", "comunicacion", "portatil"],
                 information: {
                     weight: "0.8 kg",
@@ -127,6 +129,7 @@ const SiteConfig = {
                 orderTopRated: 7,
                 description: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
                 sku: "SKU-ROU-003",
+                availability: 22,  // Disponibilidad en días
                 tags: ["enrutador", "portatil", "wifi", "red", "seguridad"],
                 information: {
                     weight: "0.3 kg",
@@ -149,6 +152,7 @@ const SiteConfig = {
                 orderTopRated: 4,
                 description: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.",
                 sku: "SKU-GPS-004",
+                availability: 5,  // Disponibilidad en días
                 tags: ["gps", "marino", "navegacion", "localizacion"],
                 information: {
                     weight: "1.2 kg",
@@ -171,6 +175,7 @@ const SiteConfig = {
                 orderTopRated: 5,
                 description: "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa.",
                 sku: "SKU-SCA-005",
+                availability: 12,  // Disponibilidad en días
                 tags: ["escaner", "profesional", "seguridad", "detection"],
                 information: {
                     weight: "0.6 kg",
@@ -193,6 +198,7 @@ const SiteConfig = {
                 orderTopRated: 6,
                 description: "Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est.",
                 sku: "SKU-BLO-006",
+                availability: 18,  // Disponibilidad en días
                 tags: ["bloqueador", "senal", "jamming", "proteccion"],
                 information: {
                     weight: "1.8 kg",
@@ -215,6 +221,7 @@ const SiteConfig = {
                 orderTopRated: 2,
                 description: "Omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus.",
                 sku: "SKU-RAD-007",
+                availability: 3,  // Disponibilidad en días
                 tags: ["radio", "satelital", "comunicacion", "portatil"],
                 information: {
                     weight: "0.5 kg",
@@ -237,6 +244,7 @@ const SiteConfig = {
                 orderTopRated: 8,
                 description: "Ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.",
                 sku: "SKU-AER-008",
+                availability: 25,  // Disponibilidad en días
                 tags: ["escaner", "aereo", "avionica", "frecuencia"],
                 information: {
                     weight: "0.9 kg",
