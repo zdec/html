@@ -32,9 +32,10 @@
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
                     <div class="search-element">
-                        <form action="#">
-                            <input type="text" placeholder="Buscar producto" />
-                            <button><i class="pe-7s-search"></i></button>
+                        <form action="#" id="search-form-desktop" class="search-form">
+                            <input type="text" id="search-input-desktop" class="search-input" placeholder="Buscar producto" autocomplete="off" />
+                            <button type="submit"><i class="pe-7s-search"></i></button>
+                            <div id="search-results-desktop" class="search-results"></div>
                         </form>
                     </div>
                 </div>
@@ -66,9 +67,10 @@
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
                     <div class="search-element">
-                        <form action="#">
-                            <input type="text" placeholder="Buscar Producto" />
-                            <button><i class="pe-7s-search"></i></button>
+                        <form action="#" id="search-form-mobile-header" class="search-form">
+                            <input type="text" id="search-input-mobile-header" class="search-input" placeholder="Buscar Producto" autocomplete="off" />
+                            <button type="submit"><i class="pe-7s-search"></i></button>
+                            <div id="search-results-mobile-header" class="search-results"></div>
                         </form>
                     </div>
                 </div>
@@ -106,9 +108,10 @@
         <div class="container">
             <!-- mobile search start -->
             <div class="search-element max-width-100">
-                <form action="#">
-                    <input type="text" placeholder="Buscar Producto" />
-                    <button><i class="pe-7s-search"></i></button>
+                <form action="#" id="search-form-mobile" class="search-form">
+                    <input type="text" id="search-input-mobile" class="search-input" placeholder="Buscar Producto" autocomplete="off" />
+                    <button type="submit"><i class="pe-7s-search"></i></button>
+                    <div id="search-results-mobile" class="search-results"></div>
                 </form>
             </div>
             <!-- mobile search start -->
