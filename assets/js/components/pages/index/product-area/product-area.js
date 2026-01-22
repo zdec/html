@@ -146,14 +146,14 @@ function loadIndexProductArea() {
                     <div class="product">
                         ${badgesHTML}
                         <div class="thumb">
-                            <a href="single-product.html" class="image">
+                            <a href="single-product.html?index=${product.index}" class="image">
                                 <img src="${product.image}" alt="${product.alt}" />
                                 <img class="hover-image" src="${product.image}" alt="${product.alt}" />
                             </a>
                         </div>
                         <div class="content">
-                            <span class="category"><a href="single-product.html">${product.category}</a></span>
-                            <h5 class="title"><a href="single-product.html">${product.title}</a></h5>
+                            <span class="category"><a href="single-product.html?index=${product.index}">${product.category}</a></span>
+                            <h5 class="title"><a href="single-product.html?index=${product.index}">${product.title}</a></h5>
                             ${priceHTML}
                         </div>
                         <div class="actions">

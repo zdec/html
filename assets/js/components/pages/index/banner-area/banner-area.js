@@ -39,6 +39,8 @@ function loadBannerArea() {
         })
         .then(html => {
             insertHTML(html);
+            // Actualizar los enlaces para incluir el parámetro index en la URL
+            updateBannerLinks();
         })
         .catch(error => {
             console.error('Error al cargar el componente Banner Area:', error);
@@ -63,4 +65,20 @@ function loadBannerArea() {
                     console.error('Error al cargar banner-area desde ruta alternativa:', fallbackError);
                 });
         });
+    
+    /**
+     * Actualiza los enlaces de los banners para incluir el parámetro index en la URL
+     */
+    function updateBannerLinks() {
+        // Buscar todos los enlaces con data-product-index
+        const bannerLinks = document.querySelectorAll('.banner-area a[data-product-index]');
+        
+        bannerLinks.forEach(link => {
+            const productIndex = link.getAttribute('data-product-index');
+            if (productIndex) {
+                // Actualizar el href para incluir el parámetro index
+                link.href = `single-product.html?index=${productIndex}`;
+            }
+        });
+    }
 }
