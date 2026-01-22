@@ -66,11 +66,237 @@ function loadModals() {
         });
     }
     
+    /**
+     * Carga la información del producto en la modal de quickview
+     * @param {number} productIndex - El índice del producto según el campo 'index' en SiteConfig
+     */
+    function loadProductInQuickview(productIndex) {
+        // Verificar que SiteConfig esté disponible
+        if (typeof SiteConfig === 'undefined' || !SiteConfig.products || !SiteConfig.products.items) {
+            console.error('SiteConfig.products no está disponible');
+            return;
+        }
+        
+        // Buscar el producto por su índice
+        const product = SiteConfig.products.items.find(p => p.index === productIndex);
+        if (!product) {
+            console.error(`Producto con índice ${productIndex} no encontrado`);
+            return;
+        }
+        
+        // Generar las imágenes del slider (1.webp a 5.webp)
+        // Estructura zoom: assets/images/product-image/zoom-image/{index}/1.webp
+        // Estructura small: assets/images/product-image/small-image/{index}/1.webp
+        function generateImageSlides(index, type) {
+            let slidesHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                const imagePath = `assets/images/product-image/${type}/${index}/${i}.webp`;
+                slidesHTML += `<div class="swiper-slide">
+                    <img class="img-responsive m-auto" src="${imagePath}" alt="${product.alt || product.title}">
+                </div>`;
+            }
+            return slidesHTML;
+        }
+        
+        // Actualizar las imágenes del slider
+        const galleryTopWrapper = document.getElementById('quickview-gallery-top');
+        const galleryThumbsWrapper = document.getElementById('quickview-gallery-thumbs');
+        
+        if (galleryTopWrapper) {
+            galleryTopWrapper.innerHTML = generateImageSlides(product.index, 'zoom-image');
+        }
+        if (galleryThumbsWrapper) {
+            galleryThumbsWrapper.innerHTML = generateImageSlides(product.index, 'small-image');
+        }
+        
+        // Actualizar el título
+        const titleElement = document.getElementById('quickview-title');
+        if (titleElement) {
+            titleElement.textContent = product.title;
+        }
+        
+        // Actualizar el precio
+        const priceElement = document.getElementById('quickview-price');
+        if (priceElement) {
+            let priceHTML = '';
+            if (product.oldPrice) {
+                priceHTML = `<li class="old-price">${product.oldPrice}</li><li class="new-price">${product.price}</li>`;
+            } else {
+                priceHTML = `<li class="new-price">${product.price}</li>`;
+            }
+            priceElement.innerHTML = priceHTML;
+        }
+        
+        // Actualizar la descripción
+        const descriptionElement = document.getElementById('quickview-description');
+        if (descriptionElement) {
+            descriptionElement.textContent = product.description || '';
+        }
+        
+        // Actualizar el SKU
+        const skuElement = document.getElementById('quickview-sku');
+        if (skuElement) {
+            skuElement.innerHTML = `<li><a href="#">${product.sku || 'N/A'}</a></li>`;
+        }
+        
+        // Actualizar la categoría
+        const categoryElement = document.getElementById('quickview-category');
+        if (categoryElement) {
+            categoryElement.innerHTML = `<li><a href="#">${product.category || 'N/A'}</a></li>`;
+        }
+        
+        // Actualizar los tags
+        const tagsElement = document.getElementById('quickview-tags');
+        if (tagsElement && product.tags && product.tags.length > 0) {
+            let tagsHTML = '';
+            product.tags.forEach((tag, idx) => {
+                tagsHTML += `<li><a href="#">${tag}${idx < product.tags.length - 1 ? ', ' : ''}</a></li>`;
+            });
+            tagsElement.innerHTML = tagsHTML;
+        } else if (tagsElement) {
+            tagsElement.innerHTML = '<li><a href="#">N/A</a></li>';
+        }
+        
+        // Reinicializar el Swiper después de actualizar el contenido
+        setTimeout(function() {
+            initQuickviewSlider();
+        }, 100);
+    }
+    
+    /**
+     * Carga la imagen del producto en los modales Cart, Wishlist y Compare
+     * @param {number} productIndex - El índice del producto según el campo 'index' en SiteConfig
+     * @param {string} modalType - Tipo de modal: 'cart', 'wishlist' o 'compare'
+     */
+    function loadProductInModal(productIndex, modalType) {
+        // Verificar que SiteConfig esté disponible
+        if (typeof SiteConfig === 'undefined' || !SiteConfig.products || !SiteConfig.products.items) {
+            console.error('SiteConfig.products no está disponible');
+            return;
+        }
+        
+        // Buscar el producto por su índice
+        const product = SiteConfig.products.items.find(p => p.index === productIndex);
+        if (!product) {
+            console.error(`Producto con índice ${productIndex} no encontrado`);
+            return;
+        }
+        
+        // Construir la ruta de la imagen: assets/images/product-image/{index}/1.webp
+        const imagePath = `assets/images/product-image/${product.index}/1.webp`;
+        
+        // Actualizar según el tipo de modal
+        if (modalType === 'cart') {
+            const imageElement = document.getElementById('cart-modal-image');
+            const titleElement = document.getElementById('cart-modal-title');
+            if (imageElement) {
+                imageElement.src = imagePath;
+                imageElement.alt = product.title || 'Detalle Orden';
+            }
+            if (titleElement) {
+                titleElement.querySelector('a').textContent = product.title || 'Detalle de la orden';
+            }
+        } else if (modalType === 'wishlist') {
+            const imageElement = document.getElementById('wishlist-modal-image');
+            const titleElement = document.getElementById('wishlist-modal-title');
+            if (imageElement) {
+                imageElement.src = imagePath;
+                imageElement.alt = product.title || 'Detalle Orden';
+            }
+            if (titleElement) {
+                titleElement.querySelector('a').textContent = product.title || 'Detalle de la orden';
+            }
+        } else if (modalType === 'compare') {
+            const imageElement = document.getElementById('compare-modal-image');
+            const titleElement = document.getElementById('compare-modal-title');
+            if (imageElement) {
+                imageElement.src = imagePath;
+                imageElement.alt = product.title || 'Detalle';
+            }
+            if (titleElement) {
+                titleElement.querySelector('a').textContent = product.title || 'Detalles';
+            }
+        }
+    }
+    
+    /**
+     * Configura los event listeners para los botones de quickview, cart, wishlist y compare
+     */
+    function setupQuickviewListeners() {
+        // Usar event delegation para manejar clicks en botones
+        // Esto funciona incluso si los productos se cargan dinámicamente
+        document.addEventListener('click', function(e) {
+            // Manejar Quick View
+            const quickviewButton = e.target.closest('.action.quickview[data-product-index]');
+            if (quickviewButton) {
+                const productIndex = parseInt(quickviewButton.getAttribute('data-product-index'));
+                if (productIndex) {
+                    // Esperar a que la modal se abra antes de cargar los datos
+                    const modal = document.querySelector('#exampleModal');
+                    if (modal) {
+                        // Escuchar el evento de Bootstrap cuando la modal se muestra
+                        const handleModalShow = function() {
+                            loadProductInQuickview(productIndex);
+                            // Remover el listener después de usarlo para evitar múltiples llamadas
+                            modal.removeEventListener('shown.bs.modal', handleModalShow);
+                        };
+                        modal.addEventListener('shown.bs.modal', handleModalShow);
+                    }
+                }
+            }
+            
+            // Manejar Add to Cart
+            const cartButton = e.target.closest('.action.add-to-cart[data-product-index]');
+            if (cartButton) {
+                const productIndex = parseInt(cartButton.getAttribute('data-product-index'));
+                if (productIndex) {
+                    const modal = document.querySelector('#exampleModal-Cart');
+                    if (modal) {
+                        const handleModalShow = function() {
+                            loadProductInModal(productIndex, 'cart');
+                            modal.removeEventListener('shown.bs.modal', handleModalShow);
+                        };
+                        modal.addEventListener('shown.bs.modal', handleModalShow);
+                    }
+                }
+            }
+            
+            // Manejar Wishlist
+            const wishlistButton = e.target.closest('.action.wishlist[data-product-index]');
+            if (wishlistButton) {
+                const productIndex = parseInt(wishlistButton.getAttribute('data-product-index'));
+                if (productIndex) {
+                    const modal = document.querySelector('#exampleModal-Wishlist');
+                    if (modal) {
+                        const handleModalShow = function() {
+                            loadProductInModal(productIndex, 'wishlist');
+                            modal.removeEventListener('shown.bs.modal', handleModalShow);
+                        };
+                        modal.addEventListener('shown.bs.modal', handleModalShow);
+                    }
+                }
+            }
+            
+            // Manejar Compare
+            const compareButton = e.target.closest('.action.compare[data-product-index]');
+            if (compareButton) {
+                const productIndex = parseInt(compareButton.getAttribute('data-product-index'));
+                if (productIndex) {
+                    const modal = document.querySelector('#exampleModal-Compare');
+                    if (modal) {
+                        const handleModalShow = function() {
+                            loadProductInModal(productIndex, 'compare');
+                            modal.removeEventListener('shown.bs.modal', handleModalShow);
+                        };
+                        modal.addEventListener('shown.bs.modal', handleModalShow);
+                    }
+                }
+            }
+        });
+    }
+    
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
-        // Los modales no tienen muchos placeholders dinámicos por ahora
-        // Si en el futuro necesitas agregar datos dinámicos, puedes hacerlo aquí
-        
         // Insertar los modales antes del cierre del body o antes del footer
         const footer = document.querySelector('.footer-area');
         if (footer) {
@@ -85,21 +311,10 @@ function loadModals() {
             }
         }
         
-        // Inicializar el Swiper después de insertar el HTML
+        // Configurar los event listeners para quickview después de insertar el HTML
         setTimeout(function() {
-            initQuickviewSlider();
+            setupQuickviewListeners();
         }, 100);
-        
-        // También inicializar cuando la modal se abre (por si acaso)
-        const modalElement = document.querySelector('#exampleModal');
-        if (modalElement) {
-            // Usar eventos de Bootstrap 5
-            modalElement.addEventListener('shown.bs.modal', function() {
-                setTimeout(function() {
-                    initQuickviewSlider();
-                }, 50);
-            });
-        }
     }
     
     // Cargar el HTML del componente usando fetch
