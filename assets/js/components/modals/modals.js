@@ -120,6 +120,7 @@ function loadModals() {
         if (priceElement) {
             let priceHTML = '';
             if (product.oldPrice) {
+                // La clase old-price tiene estilos CSS para tachar el precio
                 priceHTML = `<li class="old-price">${product.oldPrice}</li><li class="new-price">${product.price}</li>`;
             } else {
                 priceHTML = `<li class="new-price">${product.price}</li>`;

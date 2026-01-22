@@ -116,6 +116,12 @@
 				@media #{$extra-small-mobile} {
 					font-size: 26px;
 				}
+				&.old-price {
+					text-decoration: line-through;
+					color: #999;
+					margin-right: 10px;
+					font-weight: 300;
+				}
 			}
 		}
 	}

@@ -149,7 +149,7 @@ const SiteConfig = {
                 orderTopRated: 4,
                 description: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.",
                 sku: "SKU-GPS-004",
-                tags: ["gps", "marino", "navegacion", "seguridad", "localizacion"],
+                tags: ["gps", "marino", "navegacion", "localizacion"],
                 information: {
                     weight: "1.2 kg",
                     dimensions: "25 x 20 x 8 cm",
@@ -171,7 +171,7 @@ const SiteConfig = {
                 orderTopRated: 5,
                 description: "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa.",
                 sku: "SKU-SCA-005",
-                tags: ["escaner", "profesional", "seguridad", "detection", "radiofrecuencia"],
+                tags: ["escaner", "profesional", "seguridad", "detection"],
                 information: {
                     weight: "0.6 kg",
                     dimensions: "22 x 15 x 5 cm",
@@ -193,7 +193,7 @@ const SiteConfig = {
                 orderTopRated: 6,
                 description: "Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est.",
                 sku: "SKU-BLO-006",
-                tags: ["bloqueador", "senal", "seguridad", "jamming", "proteccion"],
+                tags: ["bloqueador", "senal", "jamming", "proteccion"],
                 information: {
                     weight: "1.8 kg",
                     dimensions: "30 x 25 x 10 cm",
@@ -215,7 +215,7 @@ const SiteConfig = {
                 orderTopRated: 2,
                 description: "Omnis dolor repellendus. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus.",
                 sku: "SKU-RAD-007",
-                tags: ["radio", "satelital", "comunicacion", "dos-vias", "portatil"],
+                tags: ["radio", "satelital", "comunicacion", "portatil"],
                 information: {
                     weight: "0.5 kg",
                     dimensions: "15 x 6 x 4 cm",
@@ -237,7 +237,7 @@ const SiteConfig = {
                 orderTopRated: 8,
                 description: "Ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam.",
                 sku: "SKU-AER-008",
-                tags: ["escaner", "aereo", "avionica", "frecuencia", "seguridad"],
+                tags: ["escaner", "aereo", "avionica", "frecuencia"],
                 information: {
                     weight: "0.9 kg",
                     dimensions: "28 x 18 x 6 cm",
