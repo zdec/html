@@ -51,6 +51,11 @@ function loadAllComponents(options = {}) {
         loadOffcanvas();
     }
     
+    // Cargar botón flotante de WhatsApp (se muestra en todas las páginas)
+    if (typeof loadWhatsAppButton === 'function') {
+        loadWhatsAppButton();
+    }
+    
     if (typeof loadFooter === 'function') {
         loadFooter();
     }

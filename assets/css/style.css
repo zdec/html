@@ -30,6 +30,108 @@
           box-sizing: border-box;
 }
 
+/*-- WhatsApp Floating Button --*/
+.whatsapp-floating-button {
+  position: fixed;
+  bottom: 130px;
+  right: 15px;
+  z-index: 9999;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #25D366;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+  -webkit-animation: pulse 2s infinite;
+          animation: pulse 2s infinite;
+}
+
+.whatsapp-floating-button:hover {
+  -webkit-transform: scale(1.1);
+      -ms-transform: scale(1.1);
+          transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-floating-button a {
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  text-decoration: none;
+  color: #fff;
+}
+
+.whatsapp-floating-button a i {
+  font-size: 32px;
+  line-height: 1;
+}
+
+@media only screen and (max-width: 767px) {
+  .whatsapp-floating-button {
+    width: 55px;
+    height: 55px;
+    bottom: 125px;
+    right: 10px;
+  }
+  .whatsapp-floating-button a i {
+    font-size: 28px;
+  }
+}
+
+@media only screen and (max-width: 575px) {
+  .whatsapp-floating-button {
+    width: 50px;
+    height: 50px;
+    bottom: 120px;
+    right: 5px;
+  }
+  .whatsapp-floating-button a i {
+    font-size: 24px;
+  }
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.6);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+}
+
 html,
 body {
   height: 100%;
