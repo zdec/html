@@ -15,6 +15,11 @@
     align-items: center;
     background-size: cover;
     line-height: 1;
+    
+    // Ocultar mientras se cargan los componentes
+    &.components-loading {
+        display: none !important;
+    }
     @media #{$large-mobile, $tablet-device, $desktop-device} {
         height: 300px;
     }

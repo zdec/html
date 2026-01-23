@@ -4,6 +4,11 @@
     background-color: #eee;
     background-position: center;
     background-size: cover;
+    
+    // Ocultar mientras se cargan los componentes
+    &.components-loading {
+        display: none !important;
+    }
     @media #{$tablet-device, $large-mobile}{
         height: 356px;
     }

@@ -118,6 +118,43 @@ function loadAllComponents(options = {}) {
     if (typeof jQuery !== 'undefined') {
         jQuery(document).trigger('componentsLoaded');
     }
+    
+    // Mostrar la Fashion Area después de que los componentes se carguen (solo en index)
+    // Esperar a que el header esté presente como indicador de que los componentes se cargaron
+    function showFashionArea() {
+        const header = document.querySelector('header');
+        const fashionArea = document.querySelector('.fashion-area.components-loading');
+        
+        if (fashionArea && header) {
+            // Verificar que el header esté completamente cargado
+            fashionArea.style.display = '';
+            fashionArea.classList.remove('components-loading');
+        } else if (fashionArea) {
+            // Si el header aún no está, reintentar
+            setTimeout(showFashionArea, 100);
+        }
+    }
+    
+    // Mostrar la Breadcrumb Area después de que los componentes se carguen (en contact y catalog)
+    function showBreadcrumbArea() {
+        const header = document.querySelector('header');
+        const breadcrumbArea = document.querySelector('.breadcrumb-area.components-loading');
+        
+        if (breadcrumbArea && header) {
+            // Verificar que el header esté completamente cargado
+            breadcrumbArea.style.display = '';
+            breadcrumbArea.classList.remove('components-loading');
+        } else if (breadcrumbArea) {
+            // Si el header aún no está, reintentar
+            setTimeout(showBreadcrumbArea, 100);
+        }
+    }
+    
+    // Intentar mostrar las áreas estáticas después de un breve delay
+    setTimeout(function() {
+        showFashionArea();
+        showBreadcrumbArea();
+    }, 300);
 }
 
 /**

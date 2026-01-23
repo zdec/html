@@ -322,7 +322,7 @@ const SiteConfig = {
                 alt: "Radio Marino ICOM IC-M35",
                 category: "Comunicacion",
                 title: "Radio Marino ICOM IC-M35",
-                price: "$350",
+                price: "$450",
                 oldPrice: null,
                 badges: ["sale"],
                 index: 12,

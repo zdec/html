@@ -101,7 +101,7 @@
     width: 50px;
     height: 50px;
     bottom: 120px;
-    right: 5px;
+    right: 20px;
   }
   .whatsapp-floating-button a i {
     font-size: 24px;
@@ -4796,6 +4796,10 @@ body.offcanvas-open {
   background-size: cover;
   line-height: 1;
 }
+
+.breadcrumb-area.components-loading {
+  display: none !important;
+}
 @media only screen and (max-width: 767px), only screen and (min-width: 768px) and (max-width: 991px), only screen and (min-width: 992px) and (max-width: 1199px) {
   .breadcrumb-area {
     height: 300px;
@@ -5191,6 +5195,10 @@ body.offcanvas-open {
   background-color: #eee;
   background-position: center;
   background-size: cover;
+}
+
+.fashion-area.components-loading {
+  display: none !important;
 }
 @media only screen and (min-width: 768px) and (max-width: 991px), only screen and (max-width: 767px) {
   .fashion-area {

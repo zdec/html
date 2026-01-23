@@ -9,24 +9,60 @@ function loadBannerArea() {
     
     // Función para insertar el HTML
     function insertHTML(html) {
-        // Insertar después del hero slider
-        const heroSlider = document.querySelector('.hero-slider');
-        if (heroSlider) {
-            heroSlider.closest('.section').insertAdjacentHTML('afterend', html);
-        } else {
-            // Si no hay hero slider, buscar otro punto de referencia
-            const mainWrapper = document.querySelector('.main-wrapper');
-            if (mainWrapper) {
-                const firstSection = mainWrapper.querySelector('.section, .banner-area, .product-area');
-                if (firstSection) {
-                    firstSection.insertAdjacentHTML('beforebegin', html);
-                } else {
-                    mainWrapper.insertAdjacentHTML('afterbegin', html);
+        // Función auxiliar para intentar insertar después del hero slider
+        function tryInsert() {
+            // Buscar el hero slider
+            const heroSlider = document.querySelector('.hero-slider');
+            if (heroSlider) {
+                // Encontrar el contenedor padre (section o div que contiene el hero-slider)
+                const heroContainer = heroSlider.closest('.section') || heroSlider.parentElement;
+                if (heroContainer) {
+                    heroContainer.insertAdjacentHTML('afterend', html);
+                    return true;
                 }
-            } else {
-                console.error('No se encontró lugar para insertar el banner area');
             }
+            return false;
         }
+        
+        // Intentar insertar inmediatamente
+        if (tryInsert()) {
+            return;
+        }
+        
+        // Si no se encontró el hero slider, esperar y reintentar
+        // Esto es necesario porque los componentes se cargan de forma asíncrona
+        let attempts = 0;
+        const maxAttempts = 30; // Intentar durante 3 segundos (30 * 100ms)
+        
+        const checkInterval = setInterval(function() {
+            attempts++;
+            if (tryInsert()) {
+                clearInterval(checkInterval);
+            } else if (attempts >= maxAttempts) {
+                // Si después de varios intentos no se encuentra el hero slider,
+                // insertar después del header como fallback seguro
+                clearInterval(checkInterval);
+                const header = document.querySelector('header');
+                if (header) {
+                    // Insertar después del header (el hero slider debería estar ahí)
+                    header.insertAdjacentHTML('afterend', html);
+                } else {
+                    const mainWrapper = document.querySelector('.main-wrapper');
+                    if (mainWrapper) {
+                        // Buscar cualquier sección existente y insertar después
+                        const firstSection = mainWrapper.querySelector('.section, .hero-slider, .fashion-area');
+                        if (firstSection) {
+                            firstSection.insertAdjacentHTML('afterend', html);
+                        } else {
+                            // Último recurso: insertar al inicio del main-wrapper
+                            mainWrapper.insertAdjacentHTML('afterbegin', html);
+                        }
+                    } else {
+                        console.error('No se encontró lugar para insertar el banner area');
+                    }
+                }
+            }
+        }, 100); // Revisar cada 100ms
     }
     
     // Cargar el HTML del componente usando fetch
