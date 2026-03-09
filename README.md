@@ -37,21 +37,24 @@ docker compose up
 - **URL:** http://localhost:8000
 - La aplicación Laravel estará disponible en el puerto 8000.
 
-### 4. Primera ejecución: migraciones y clave
+### 4. Primera ejecución
 
-En la primera ejecución, genera la clave de la aplicación y ejecuta las migraciones:
+En la primera ejecución genera la clave de la aplicación:
 
 ```bash
 docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate
 ```
+
+La base de datos se inicializa automáticamente con `database/schema_init.sql` al levantar PostgreSQL por primera vez. No se usan migraciones ni seeders.
+
+Ver [docs/database.md](docs/database.md) y [database/README.md](database/README.md) para más detalles.
 
 ## Estructura del proyecto
 
 ```
 .
 ├── app/           # Aplicación Laravel
-├── assets/        # Plantilla HTML (referencia)
+├── database/      # Script inicial de BD (schema_init.sql)
 ├── docker/        # Configuración Nginx
 ├── docker-compose.yml
 ├── Dockerfile

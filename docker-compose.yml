@@ -35,6 +35,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/schema_init.sql:/docker-entrypoint-initdb.d/01-schema.sql
     ports:
       - "5432:5432"
 
