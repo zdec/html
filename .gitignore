@@ -1,0 +1,39 @@
+# Laravel (app/)
+app/vendor
+app/node_modules
+app/.env
+app/storage/*.key
+app/bootstrap/cache/*
+app/public/hot
+app/public/storage
+app/.phpunit.result.cache
+app/.phpunit.cache
+Homestead.json
+Homestead.yaml
+
+# Entorno
+.env
+.env.local
+.env.backup
+.env.production
+
+# Carpeta de desarrollo (no versionar)
+/script
+
+# Cursor
+/.cursor
+
+# Docker
+docker-compose.override.yml
+
+# IDE y OS
+.idea
+.vscode
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log
+yarn-error.log
