@@ -228,7 +228,7 @@ function loadOffcanvas() {
                             '<div style="background: #ff9800; color: white; padding: 20px; text-align: center; margin: 20px;">' +
                             '<strong>⚠️ Error al cargar el componente Offcanvas</strong><br>' +
                             'Este sitio necesita ejecutarse en un servidor local.<br>' +
-                            'Por favor, ejecuta: <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">./start-server.sh</code>' +
+                            'Por favor, ejecuta: <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 3px;">./docker-dev.sh</code>' +
                             '</div>'
                         );
                     }
