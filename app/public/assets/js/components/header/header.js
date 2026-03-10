@@ -11,7 +11,7 @@ function loadHeader() {
     }
     
     // Ruta al archivo HTML del componente
-    const headerHTMLPath = 'assets/js/components/header/header.html';
+    const headerHTMLPath = '/assets/js/components/header/header.html';
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
@@ -25,7 +25,7 @@ function loadHeader() {
             phoneClean: (SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '').replace(/\s/g, ''),
             email: SiteConfig.contact.email || '',
             accountText: SiteConfig.texts.accountText || 'Mi Cuenta',
-            logo: SiteConfig.images.logo || 'assets/images/logo/logo.png',
+            logo: SiteConfig.images.logo || '/assets/images/logo/logo.png',
             menuItems: SiteConfig.menu ? SiteConfig.menu.map(item => 
                 `<li><a href="${item.href}">${item.text}</a></li>`
             ).join('') : '',
@@ -249,7 +249,7 @@ function loadHeader() {
         let html = '';
         results.forEach(product => {
             const highlightedTitle = highlightText(product.title, query);
-            const imagePath = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imagePath = product.image || `/assets/images/products/${product.id || 1}/1.webp`;
             const price = product.oldPrice ? 
                 `<span class="search-result-price-old">${product.oldPrice}</span> <span class="search-result-price">${product.price}</span>` :
                 `<span class="search-result-price">${product.price}</span>`;

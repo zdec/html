@@ -1,8 +1,8 @@
 /**
  * Inicializa los event listeners para los offcanvas
- * Esta función debe llamarse después de que los elementos offcanvas se inserten en el DOM
+ * @param {Object} callbacks - { onWishlistOpen: function } - callback al abrir wishlist
  */
-function initOffcanvasListeners() {
+function initOffcanvasListeners(callbacks) {
     // Verificar que jQuery esté disponible
     if (typeof jQuery === 'undefined') {
         console.warn('jQuery no está disponible. Los offcanvas pueden no funcionar correctamente.');
@@ -11,21 +11,23 @@ function initOffcanvasListeners() {
     
     var $ = jQuery;
     var $body = $('body');
-    var $offCanvasToggle = $(".offcanvas-toggle");
     var $offCanvas = $(".offcanvas");
     var $offCanvasOverlay = $(".offcanvas-overlay");
     var $mobileMenuToggle = $(".mobile-menu-toggle");
     
-    // Remover listeners anteriores para evitar duplicados
-    $offCanvasToggle.off('click.offcanvas');
-    $(".offcanvas-close, .offcanvas-overlay").off('click.offcanvas');
+    $(document).off('click.offcanvas.open', '.offcanvas-toggle');
+    $("body").off('click.offcanvas.close', '.offcanvas-close, .offcanvas-overlay');
     
-    // Agregar listeners para abrir offcanvas
-    $offCanvasToggle.on("click.offcanvas", function(e) {
+    // Usar delegación: funciona aunque el header se cargue después
+    $(document).on("click.offcanvas.open", ".offcanvas-toggle", function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var $this = $(this),
             $target = $this.attr("href");
         if ($target) {
+            if ($target === '#offcanvas-wishlist' && callbacks && typeof callbacks.onWishlistOpen === 'function') {
+                callbacks.onWishlistOpen();
+            }
             $body.addClass("offcanvas-open");
             $($target).addClass("offcanvas-open");
             $offCanvasOverlay.fadeIn();
@@ -35,8 +37,7 @@ function initOffcanvasListeners() {
         }
     });
     
-    // Agregar listeners para cerrar offcanvas
-    $(".offcanvas-close, .offcanvas-overlay").on("click.offcanvas", function(e) {
+    $("body").on("click.offcanvas.close", ".offcanvas-close, .offcanvas-overlay", function(e) {
         e.preventDefault();
         $body.removeClass("offcanvas-open");
         $offCanvas.removeClass("offcanvas-open");
@@ -57,9 +58,69 @@ function loadOffcanvas() {
         return;
     }
     
-    // Ruta al archivo HTML del componente
-    const offcanvasHTMLPath = 'assets/js/components/offcanvas/offcanvas.html';
-    
+    const offcanvasHTMLPath = '/assets/js/components/offcanvas/offcanvas.html';
+    const WISHLIST_STORAGE_KEY = 'itsecursas-wishlist';
+
+    function getWishlistIds() {
+        try {
+            const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) { return []; }
+    }
+
+    function removeFromWishlist(productId) {
+        try {
+            const ids = getWishlistIds().filter(id => id !== productId);
+            localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(ids));
+            renderWishlistOffcanvas();
+        } catch (e) { /* localStorage no disponible */ }
+    }
+
+    function renderWishlistOffcanvas() {
+        const listEl = document.getElementById('wishlist-product-list');
+        if (!listEl) return;
+
+        const ids = getWishlistIds();
+        const products = (typeof SiteConfig !== 'undefined' && SiteConfig.products?.items) ? SiteConfig.products.items : [];
+
+        if (ids.length === 0) {
+            listEl.innerHTML = '<li class="empty-wishlist text-center p-4">No hay productos en Me gusta</li>';
+            return;
+        }
+
+        const html = ids.map(id => {
+            const product = products.find(p => p.id === parseInt(id, 10));
+            if (!product) return `<li data-product-id="${id}"><span>Producto #${id}</span> <a href="#" class="remove">×</a></li>`;
+            const imgSrc = product.image || `/assets/images/products/${product.id}/1.webp`;
+            const url = product.slug ? `/producto/${product.slug}` : '#';
+            return `<li data-product-id="${product.id}">
+                <a href="${url}" class="image"><img src="${imgSrc}" alt="${(product.alt || product.title || '').replace(/"/g, '&quot;')}"></a>
+                <div class="content">
+                    <a href="${url}" class="title">${(product.title || '').replace(/</g, '&lt;')}</a>
+                    <span class="quantity-price">1 x <span class="amount">${product.price || ''}</span></span>
+                    <a href="#" class="remove" aria-label="Eliminar">×</a>
+                </div>
+            </li>`;
+        }).join('');
+
+        listEl.innerHTML = html;
+    }
+
+    function initWishlistListeners() {
+        document.addEventListener('click', function(e) {
+            const removeBtn = e.target.closest('#wishlist-product-list .remove');
+            if (removeBtn) {
+                e.preventDefault();
+                const li = removeBtn.closest('li[data-product-id]');
+                if (li) {
+                    const productId = parseInt(li.getAttribute('data-product-id'), 10);
+                    removeFromWishlist(productId);
+                }
+            }
+        });
+        document.addEventListener('wishlist-updated', renderWishlistOffcanvas);
+    }
+
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
         // Preparar los datos para reemplazar los placeholders
@@ -101,16 +162,17 @@ function loadOffcanvas() {
             }
         }
         
+        renderWishlistOffcanvas();
+        initWishlistListeners();
+
         // Inicializar los event listeners del offcanvas después de insertar el HTML
-        // Esperar a que jQuery esté disponible si aún no lo está
         if (typeof jQuery !== 'undefined') {
-            initOffcanvasListeners();
+            initOffcanvasListeners({ onWishlistOpen: renderWishlistOffcanvas });
         } else {
-            // Si jQuery no está disponible aún, esperar a que se cargue
             var checkJQuery = setInterval(function() {
                 if (typeof jQuery !== 'undefined') {
                     clearInterval(checkJQuery);
-                    initOffcanvasListeners();
+                    initOffcanvasListeners({ onWishlistOpen: renderWishlistOffcanvas });
                 }
             }, 50);
             
@@ -118,7 +180,7 @@ function loadOffcanvas() {
             setTimeout(function() {
                 clearInterval(checkJQuery);
                 if (typeof jQuery !== 'undefined') {
-                    initOffcanvasListeners();
+                    initOffcanvasListeners({ onWishlistOpen: renderWishlistOffcanvas });
                 } else {
                     console.error('jQuery no está disponible después de 2 segundos. Los offcanvas pueden no funcionar.');
                 }

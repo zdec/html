@@ -5,7 +5,7 @@
  */
 function loadProductDetailsArea() {
     // Ruta al archivo HTML del componente
-    const productDetailsAreaHTMLPath = 'assets/js/components/pages/single-product/product-details-area/product-details-area.html';
+    const productDetailsAreaHTMLPath = '/assets/js/components/pages/single-product/product-details-area/product-details-area.html';
     
     // Función para insertar el HTML e inicializar los sliders
     function insertHTML(html) {
@@ -151,26 +151,17 @@ function loadProductDetailsArea() {
         }
         
         // Generar las imágenes del slider (1.webp a 5.webp)
-        // Estructura zoom: assets/images/product-image/zoom-image/{index}/1.webp
-        // Estructura small: assets/images/product-image/small-image/{index}/1.webp
-        function generateImageSlides(index, type) {
+        // Estructura: /assets/images/products/{id}/1.webp ... 5.webp
+        function generateImageSlides(productId) {
             let slidesHTML = '';
             for (let i = 1; i <= 5; i++) {
-                const imagePath = `assets/images/product-image/${type}/${index}/${i}.webp`;
-                if (type === 'zoom-image') {
-                    // Para zoom-image, incluir el venobox para vista completa
-                    slidesHTML += `<div class="swiper-slide">
-                        <img class="img-responsive m-auto" src="${imagePath}" alt="${product.alt || product.title}">
-                        <a class="venobox full-preview" data-gall="myGallery" href="${imagePath}">
-                            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
-                        </a>
-                    </div>`;
-                } else {
-                    // Para small-image, solo la imagen
-                    slidesHTML += `<div class="swiper-slide">
-                        <img class="img-responsive m-auto" src="${imagePath}" alt="${product.alt || product.title}">
-                    </div>`;
-                }
+                const imagePath = `/assets/images/products/${productId}/${i}.webp`;
+                slidesHTML += `<div class="swiper-slide">
+                    <img class="img-responsive m-auto" src="${imagePath}" alt="${product.alt || product.title}">
+                    <a class="venobox full-preview" data-gall="myGallery" href="${imagePath}">
+                        <i class="fa fa-arrows-alt" aria-hidden="true"></i>
+                    </a>
+                </div>`;
             }
             return slidesHTML;
         }
@@ -180,10 +171,10 @@ function loadProductDetailsArea() {
         const zoomThumbsWrapper = document.getElementById('product-details-zoom-thumbs');
         
         if (zoomTopWrapper) {
-            zoomTopWrapper.innerHTML = generateImageSlides(product.index, 'zoom-image');
+            zoomTopWrapper.innerHTML = generateImageSlides(product.id || product.index);
         }
         if (zoomThumbsWrapper) {
-            zoomThumbsWrapper.innerHTML = generateImageSlides(product.index, 'small-image');
+            zoomThumbsWrapper.innerHTML = generateImageSlides(product.id || product.index);
         }
         
         // Actualizar el título

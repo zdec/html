@@ -11,13 +11,13 @@ function loadFooter() {
     }
     
     // Ruta al archivo HTML del componente
-    const footerHTMLPath = 'assets/js/components/footer/footer.html';
+    const footerHTMLPath = '/assets/js/components/footer/footer.html';
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
         // Preparar los datos para reemplazar los placeholders
         const data = {
-            footerLogo: SiteConfig.images.footerLogo || 'assets/images/logo/footer-logo.png',
+            footerLogo: SiteConfig.images.footerLogo || '/assets/images/logo/footer-logo.png',
             socialFacebook: SiteConfig.social.facebook || '#',
             socialTumblr: SiteConfig.social.tumblr || '#',
             socialTwitter: SiteConfig.social.twitter || '#',

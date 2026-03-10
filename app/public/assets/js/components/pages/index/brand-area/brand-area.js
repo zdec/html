@@ -5,7 +5,7 @@
  */
 function loadBrandArea() {
     // Ruta al archivo HTML del componente
-    const brandAreaHTMLPath = 'assets/js/components/pages/index/brand-area/brand-area.html';
+    const brandAreaHTMLPath = '/assets/js/components/pages/index/brand-area/brand-area.html';
     
     // Función para insertar el HTML e inicializar el slider
     function insertHTML(html) {

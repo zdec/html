@@ -5,7 +5,7 @@
  */
 function loadProductArea() {
     // Ruta al archivo HTML del componente
-    const productAreaHTMLPath = 'assets/js/components/pages/single-product/product-area/product-area.html';
+    const productAreaHTMLPath = '/assets/js/components/pages/single-product/product-area/product-area.html';
     
     // Función para insertar el HTML e inicializar el slider
     function insertHTML(html) {
@@ -185,8 +185,8 @@ function loadProductArea() {
                 </span>`;
             }
             
-            // Ruta de la imagen: assets/images/product-image/{index}/1.webp
-            const imagePath = `assets/images/product-image/${product.index}/1.webp`;
+            // Ruta: /assets/images/products/{id}/1.webp
+            const imagePath = product.image || `/assets/images/products/${product.id || product.index}/1.webp`;
             
             // Generar HTML completo del producto
             return `
@@ -195,19 +195,19 @@ function loadProductArea() {
                     <div class="product">
                         ${badgesHTML}
                         <div class="thumb">
-                            <a href="single-product.html?index=${product.index}" class="image">
+                            <a href="/producto/${product.slug || ''}" class="image">
                                 <img src="${imagePath}" alt="${product.alt || product.title}" />
                                 <img class="hover-image" src="${imagePath}" alt="${product.alt || product.title}" />
                             </a>
                         </div>
                         <div class="content">
-                            <span class="category"><a href="single-product.html?index=${product.index}">${product.category}</a></span>
-                            <h5 class="title"><a href="single-product.html?index=${product.index}">${product.title}</a></h5>
+                            <span class="category"><a href="/producto/${product.slug || ''}">${product.category}</a></span>
+                            <h5 class="title"><a href="/producto/${product.slug || ''}">${product.title}</a></h5>
                             ${priceHTML}
                         </div>
                         <div class="actions">
-                            <button class="action wishlist" data-product-index="${product.index}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
-                            <button class="action quickview" data-link-action="quickview" data-product-index="${product.index}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
+                            <button class="action wishlist" data-product-id="${product.id}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                            <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                         </div>
                     </div>
                 </div>

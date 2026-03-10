@@ -5,7 +5,7 @@
  */
 function loadHeroSlider() {
     // Ruta al archivo HTML del componente
-    const heroSliderHTMLPath = 'assets/js/components/pages/index/hero-slider/hero-slider.html';
+    const heroSliderHTMLPath = '/assets/js/components/pages/index/hero-slider/hero-slider.html';
     
     // Función para insertar el HTML, procesar data-bg-image e inicializar Swiper
     function insertHTML(html) {

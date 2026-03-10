@@ -5,7 +5,7 @@
  */
 function loadIndexProductArea() {
     // Ruta al archivo HTML del componente
-    const productAreaHTMLPath = 'assets/js/components/pages/index/product-area/product-area.html';
+    const productAreaHTMLPath = '/assets/js/components/pages/index/product-area/product-area.html';
     
     // Función para insertar el HTML
     function insertHTML(html) {
@@ -140,7 +140,7 @@ function loadIndexProductArea() {
             }
             
             const productUrl = product.slug ? `/producto/${product.slug}` : `single-product.html?index=${product.index}`;
-            const imgSrc = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imgSrc = product.image || `/assets/images/products/${product.id || product.index || 1}/1.webp`;
             return `
                 <div class="col-lg-4 col-xl-3 col-md-6 col-sm-6 col-xs-6 mb-30px">
                     <div class="product">
@@ -157,8 +157,8 @@ function loadIndexProductArea() {
                             ${priceHTML}
                         </div>
                         <div class="actions">
-                            <a class="action wishlist" href="${productUrl}" title="Wishlist"><i class="pe-7s-like"></i></a>
-                            <a class="action quickview" href="${productUrl}" title="Vista rápida"><i class="pe-7s-look"></i></a>
+                            <button class="action wishlist" data-product-id="${product.id}" title="Me gusta" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                            <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Vista rápida" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                         </div>
                     </div>
                 </div>

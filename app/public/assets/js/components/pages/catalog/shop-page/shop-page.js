@@ -5,7 +5,7 @@
  */
 function loadShopPage() {
     // Ruta al archivo HTML del componente
-    const shopPageHTMLPath = 'assets/js/components/pages/catalog/shop-page/shop-page.html';
+    const shopPageHTMLPath = '/assets/js/components/pages/catalog/shop-page/shop-page.html';
     
     // Función para insertar el HTML
     function insertHTML(html) {
@@ -138,7 +138,7 @@ function loadShopPage() {
             
             // Ruta de la imagen: assets/images/product-image/{index}/1.webp
             const productUrl = product.slug ? '/producto/' + product.slug : 'single-product.html?index=' + (product.index || 1);
-            const imagePath = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imagePath = product.image || `/assets/images/products/${product.id || product.index || 1}/1.webp`;
             
             // Generar HTML completo del producto en formato grid
             return `
@@ -158,8 +158,8 @@ function loadShopPage() {
                             ${priceHTML}
                         </div>
                         <div class="actions">
-                            <button class="action wishlist" data-product-index="${product.index}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
-                            <button class="action quickview" data-link-action="quickview" data-product-index="${product.index}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
+                            <button class="action wishlist" data-product-id="${product.id}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                            <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                         </div>
                     </div>
                 </div>
@@ -214,7 +214,7 @@ function loadShopPage() {
             
             // Ruta de la imagen: assets/images/product-image/{index}/1.webp
             const productUrl = product.slug ? '/producto/' + product.slug : 'single-product.html?index=' + (product.index || 1);
-            const imagePath = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imagePath = product.image || `/assets/images/products/${product.id || product.index || 1}/1.webp`;
             
             // Descripción corta (primeros 150 caracteres)
             const shortDescription = product.description ? product.description.substring(0, 150) + '...' : 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmodol tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veni quis nostrud exercitation ullamco laboris';
@@ -244,8 +244,8 @@ function loadShopPage() {
                                 <div class="box-inner">
                                     ${priceHTML}
                                     <div class="actions">
-                                        <button class="action wishlist" data-product-index="${product.index}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
-                                        <button class="action quickview" data-link-action="quickview" data-product-index="${product.index}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
+                                        <button class="action wishlist" data-product-id="${product.id}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                                        <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -433,7 +433,7 @@ function loadShopPage() {
             
             // Ruta de la imagen: assets/images/product-image/{index}/1.webp
             const productUrl = product.slug ? '/producto/' + product.slug : 'single-product.html?index=' + (product.index || 1);
-            const imagePath = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imagePath = product.image || `/assets/images/products/${product.id || product.index || 1}/1.webp`;
             
             // Generar HTML completo del producto en formato grid
             return `
@@ -453,8 +453,8 @@ function loadShopPage() {
                             ${priceHTML}
                         </div>
                         <div class="actions">
-                            <button class="action wishlist" data-product-index="${product.index}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
-                            <button class="action quickview" data-link-action="quickview" data-product-index="${product.index}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
+                            <button class="action wishlist" data-product-id="${product.id}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                            <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                         </div>
                     </div>
                 </div>
@@ -509,7 +509,7 @@ function loadShopPage() {
             
             // Ruta de la imagen: assets/images/product-image/{index}/1.webp
             const productUrl = product.slug ? '/producto/' + product.slug : 'single-product.html?index=' + (product.index || 1);
-            const imagePath = product.image || `assets/images/product-image/${product.index || 1}/1.webp`;
+            const imagePath = product.image || `/assets/images/products/${product.id || product.index || 1}/1.webp`;
             
             // Descripción corta (primeros 150 caracteres)
             const shortDescription = product.description ? product.description.substring(0, 150) + '...' : 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmodol tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veni quis nostrud exercitation ullamco laboris';
@@ -539,8 +539,8 @@ function loadShopPage() {
                                 <div class="box-inner">
                                     ${priceHTML}
                                     <div class="actions">
-                                        <button class="action wishlist" data-product-index="${product.index}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
-                                        <button class="action quickview" data-link-action="quickview" data-product-index="${product.index}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
+                                        <button class="action wishlist" data-product-id="${product.id}" title="Wishlist" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
+                                        <button class="action quickview" data-link-action="quickview" data-product-id="${product.id}" title="Quick view" data-bs-toggle="modal" data-bs-target="#exampleModal"><i class="pe-7s-look"></i></button>
                                     </div>
                                 </div>
                             </div>

@@ -5,7 +5,7 @@
  */
 function loadBannerArea() {
     // Ruta al archivo HTML del componente
-    const bannerAreaHTMLPath = 'assets/js/components/pages/index/banner-area/banner-area.html';
+    const bannerAreaHTMLPath = '/assets/js/components/pages/index/banner-area/banner-area.html';
     
     // Función para insertar el HTML
     function insertHTML(html) {
@@ -103,17 +103,17 @@ function loadBannerArea() {
         });
     
     /**
-     * Actualiza los enlaces de los banners para incluir el parámetro index en la URL
+     * Actualiza los enlaces de los banners para usar /producto/{slug} (ruta Laravel)
      */
     function updateBannerLinks() {
-        // Buscar todos los enlaces con data-product-index
-        const bannerLinks = document.querySelectorAll('.banner-area a[data-product-index]');
-        
+        const products = typeof SiteConfig !== 'undefined' && SiteConfig.products?.items ? SiteConfig.products.items : [];
+        const bannerLinks = document.querySelectorAll('.banner-area a[data-product-id]');
+
         bannerLinks.forEach(link => {
-            const productIndex = link.getAttribute('data-product-index');
-            if (productIndex) {
-                // Actualizar el href para incluir el parámetro index
-                link.href = `single-product.html?index=${productIndex}`;
+            const productId = parseInt(link.getAttribute('data-product-id'), 10);
+            const product = products.find(p => p.id === productId);
+            if (product && product.slug) {
+                link.href = `/producto/${product.slug}`;
             }
         });
     }

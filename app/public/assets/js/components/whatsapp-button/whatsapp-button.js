@@ -11,7 +11,7 @@ function loadWhatsAppButton() {
     }
     
     // Ruta al archivo HTML del componente
-    const whatsappButtonHTMLPath = 'assets/js/components/whatsapp-button/whatsapp-button.html';
+    const whatsappButtonHTMLPath = '/assets/js/components/whatsapp-button/whatsapp-button.html';
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {

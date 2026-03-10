@@ -10,7 +10,7 @@ function loadMapArea() {
     }
     
     // Ruta al archivo HTML del componente
-    const mapAreaHTMLPath = 'assets/js/components/pages/contact/map-area/map-area.html';
+    const mapAreaHTMLPath = '/assets/js/components/pages/contact/map-area/map-area.html';
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {

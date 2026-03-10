@@ -5,7 +5,7 @@
  */
 function loadTestimonialArea() {
     // Ruta al archivo HTML del componente
-    const testimonialAreaHTMLPath = 'assets/js/components/pages/index/testimonial-area/testimonial-area.html';
+    const testimonialAreaHTMLPath = '/assets/js/components/pages/index/testimonial-area/testimonial-area.html';
     
     // Función para insertar el HTML e inicializar el slider
     function insertHTML(html) {

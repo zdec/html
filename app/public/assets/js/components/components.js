@@ -23,6 +23,7 @@ if (typeof SiteConfig === 'undefined') {
  * @param {boolean} options.loadProductDetailsArea - Si se debe cargar el product details area (default: false, solo en single-product)
  * @param {boolean} options.loadProductArea - Si se debe cargar el product area (default: false, solo en single-product)
  * @param {boolean} options.loadShopPage - Si se debe cargar el shop page (default: false, solo en catalog)
+ * @param {boolean} options.loadFavoritesPage - Si se debe cargar la página de favoritos (default: false, solo en favoritos)
  */
 function loadAllComponents(options = {}) {
     const defaults = {
@@ -37,7 +38,8 @@ function loadAllComponents(options = {}) {
         loadMapArea: false,
         loadProductDetailsArea: false,
         loadProductArea: false,
-        loadShopPage: false
+        loadShopPage: false,
+        loadFavoritesPage: false
     };
     
     const config = Object.assign({}, defaults, options);
@@ -107,6 +109,9 @@ function loadAllComponents(options = {}) {
     if (config.loadShopPage && typeof loadShopPage === 'function') {
         loadShopPage();
     }
+    if (config.loadFavoritesPage && typeof loadFavoritesPage === 'function') {
+        loadFavoritesPage();
+    }
     
     // Los scripts normalmente no se cargan dinámicamente porque ya están en el HTML
     // Pero se puede activar si es necesario
@@ -167,9 +172,10 @@ function initComponents() {
     const isContactPage = pathname.endsWith('contact.html') || pathname.includes('/contacto');
     const isSingleProductPage = pathname.endsWith('single-product.html') || pathname.includes('/producto/');
     const isCatalogPage = pathname.endsWith('catalog.html') || pathname.includes('/catalogo');
+    const isFavoritesPage = pathname.includes('/favoritos');
     
     const options = {
-        loadModals: isIndexPage || isSingleProductPage || isCatalogPage,
+        loadModals: isIndexPage || isSingleProductPage || isCatalogPage || isFavoritesPage,
         loadScripts: false,
         loadHeroSlider: isIndexPage,
         loadBannerArea: isIndexPage,
@@ -180,7 +186,8 @@ function initComponents() {
         loadMapArea: isContactPage,
         loadProductDetailsArea: isSingleProductPage && !window.LARAVEL_PRODUCT_PAGE,
         loadProductArea: isSingleProductPage && !window.LARAVEL_PRODUCT_PAGE,
-        loadShopPage: isCatalogPage
+        loadShopPage: isCatalogPage,
+        loadFavoritesPage: isFavoritesPage
     };
     
     loadAllComponents(options);

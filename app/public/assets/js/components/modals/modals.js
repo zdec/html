@@ -10,9 +10,21 @@ function loadModals() {
         console.warn('SiteConfig no está definido. Los modales se cargarán sin datos dinámicos.');
     }
     
-    // Ruta al archivo HTML del componente
-    const modalsHTMLPath = 'assets/js/components/modals/modals.html';
-    
+    const modalsHTMLPath = '/assets/js/components/modals/modals.html';
+    const WISHLIST_STORAGE_KEY = 'itsecursas-wishlist';
+
+    function saveToWishlist(productId) {
+        try {
+            const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
+            const ids = stored ? JSON.parse(stored) : [];
+            if (!ids.includes(productId)) {
+                ids.push(productId);
+                localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(ids));
+            }
+            document.dispatchEvent(new CustomEvent('wishlist-updated'));
+        } catch (e) { /* localStorage no disponible */ }
+    }
+
     // Función para inicializar el Swiper de la modal de quickview
     function initQuickviewSlider() {
         if (typeof Swiper === 'undefined') {
@@ -70,27 +82,26 @@ function loadModals() {
      * Carga la información del producto en la modal de quickview
      * @param {number} productIndex - El índice del producto según el campo 'index' en SiteConfig
      */
-    function loadProductInQuickview(productIndex) {
-        // Verificar que SiteConfig esté disponible
+    function loadProductInQuickview(idOrIndex, lookupBy) {
         if (typeof SiteConfig === 'undefined' || !SiteConfig.products || !SiteConfig.products.items) {
             console.error('SiteConfig.products no está disponible');
             return;
         }
-        
-        // Buscar el producto por su índice
-        const product = SiteConfig.products.items.find(p => p.index === productIndex);
+        // Buscar por id (Laravel) o por index (legacy)
+        const product = lookupBy === 'id'
+            ? SiteConfig.products.items.find(p => p.id === idOrIndex)
+            : SiteConfig.products.items.find(p => p.index === idOrIndex);
         if (!product) {
-            console.error(`Producto con índice ${productIndex} no encontrado`);
+            console.error(`Producto no encontrado`);
             return;
         }
         
         // Generar las imágenes del slider (1.webp a 5.webp)
-        // Estructura zoom: assets/images/product-image/zoom-image/{index}/1.webp
-        // Estructura small: assets/images/product-image/small-image/{index}/1.webp
-        function generateImageSlides(index, type) {
+        // Estructura: /assets/images/products/{id}/1.webp ... 5.webp
+        function generateImageSlides(productId) {
             let slidesHTML = '';
             for (let i = 1; i <= 5; i++) {
-                const imagePath = `assets/images/product-image/${type}/${index}/${i}.webp`;
+                const imagePath = `/assets/images/products/${productId}/${i}.webp`;
                 slidesHTML += `<div class="swiper-slide">
                     <img class="img-responsive m-auto" src="${imagePath}" alt="${product.alt || product.title}">
                 </div>`;
@@ -103,10 +114,10 @@ function loadModals() {
         const galleryThumbsWrapper = document.getElementById('quickview-gallery-thumbs');
         
         if (galleryTopWrapper) {
-            galleryTopWrapper.innerHTML = generateImageSlides(product.index, 'zoom-image');
+            galleryTopWrapper.innerHTML = generateImageSlides(product.id || product.index);
         }
         if (galleryThumbsWrapper) {
-            galleryThumbsWrapper.innerHTML = generateImageSlides(product.index, 'small-image');
+            galleryThumbsWrapper.innerHTML = generateImageSlides(product.id || product.index);
         }
         
         // Actualizar el título
@@ -179,22 +190,23 @@ function loadModals() {
      * @param {number} productIndex - El índice del producto según el campo 'index' en SiteConfig
      * @param {string} modalType - Tipo de modal: 'cart', 'wishlist' o 'compare'
      */
-    function loadProductInModal(productIndex, modalType) {
-        // Verificar que SiteConfig esté disponible
+    function loadProductInModal(idOrIndex, modalType, lookupBy) {
         if (typeof SiteConfig === 'undefined' || !SiteConfig.products || !SiteConfig.products.items) {
             console.error('SiteConfig.products no está disponible');
             return;
         }
-        
-        // Buscar el producto por su índice
-        const product = SiteConfig.products.items.find(p => p.index === productIndex);
+        const product = lookupBy === 'id'
+            ? SiteConfig.products.items.find(p => p.id === idOrIndex)
+            : (lookupBy === 'index'
+                ? SiteConfig.products.items.find(p => p.index === idOrIndex)
+                : SiteConfig.products.items.find(p => p.id === idOrIndex) || SiteConfig.products.items.find(p => p.index === idOrIndex));
         if (!product) {
-            console.error(`Producto con índice ${productIndex} no encontrado`);
+            console.error(`Producto no encontrado`);
             return;
         }
         
-        // Construir la ruta de la imagen: assets/images/product-image/{index}/1.webp
-        const imagePath = `assets/images/product-image/${product.index}/1.webp`;
+        // Ruta de la imagen: /assets/images/products/{id}/1.webp
+        const imagePath = product.image || `/assets/images/products/${product.id || product.index}/1.webp`;
         
         // Actualizar según el tipo de modal
         if (modalType === 'cart') {
@@ -205,7 +217,11 @@ function loadModals() {
                 imageElement.alt = product.title || 'Detalle Orden';
             }
             if (titleElement) {
-                titleElement.querySelector('a').textContent = product.title || 'Detalle de la orden';
+                const link = titleElement.querySelector('a');
+                if (link) {
+                    link.textContent = product.title || 'Detalle de la orden';
+                    link.href = product.slug ? `/producto/${product.slug}` : '#';
+                }
             }
         } else if (modalType === 'wishlist') {
             const imageElement = document.getElementById('wishlist-modal-image');
@@ -215,7 +231,11 @@ function loadModals() {
                 imageElement.alt = product.title || 'Detalle Orden';
             }
             if (titleElement) {
-                titleElement.querySelector('a').textContent = product.title || 'Detalle de la orden';
+                const link = titleElement.querySelector('a');
+                if (link) {
+                    link.textContent = product.title || 'Detalle de la orden';
+                    link.href = product.slug ? `/producto/${product.slug}` : '#';
+                }
             }
         } else if (modalType === 'compare') {
             const imageElement = document.getElementById('compare-modal-image');
@@ -225,7 +245,11 @@ function loadModals() {
                 imageElement.alt = product.title || 'Detalle';
             }
             if (titleElement) {
-                titleElement.querySelector('a').textContent = product.title || 'Detalles';
+                const link = titleElement.querySelector('a');
+                if (link) {
+                    link.textContent = product.title || 'Detalles';
+                    link.href = product.slug ? `/producto/${product.slug}` : '#';
+                }
             }
         }
     }
@@ -237,18 +261,17 @@ function loadModals() {
         // Usar event delegation para manejar clicks en botones
         // Esto funciona incluso si los productos se cargan dinámicamente
         document.addEventListener('click', function(e) {
-            // Manejar Quick View
-            const quickviewButton = e.target.closest('.action.quickview[data-product-index]');
+            // Manejar Quick View (soporta data-product-id o data-product-index)
+            const quickviewButton = e.target.closest('.action.quickview[data-product-id], .action.quickview[data-product-index]');
             if (quickviewButton) {
-                const productIndex = parseInt(quickviewButton.getAttribute('data-product-index'));
-                if (productIndex) {
-                    // Esperar a que la modal se abra antes de cargar los datos
+                const productId = quickviewButton.getAttribute('data-product-id');
+                const productIndex = quickviewButton.getAttribute('data-product-index');
+                const idOrIndex = productId ? parseInt(productId, 10) : (productIndex ? parseInt(productIndex, 10) : null);
+                if (idOrIndex) {
                     const modal = document.querySelector('#exampleModal');
                     if (modal) {
-                        // Escuchar el evento de Bootstrap cuando la modal se muestra
                         const handleModalShow = function() {
-                            loadProductInQuickview(productIndex);
-                            // Remover el listener después de usarlo para evitar múltiples llamadas
+                            loadProductInQuickview(idOrIndex, productId ? 'id' : 'index');
                             modal.removeEventListener('shown.bs.modal', handleModalShow);
                         };
                         modal.addEventListener('shown.bs.modal', handleModalShow);
@@ -256,15 +279,17 @@ function loadModals() {
                 }
             }
             
-            // Manejar Add to Cart
-            const cartButton = e.target.closest('.action.add-to-cart[data-product-index]');
+            // Manejar Add to Cart (soporta data-product-id o data-product-index)
+            const cartButton = e.target.closest('.action.add-to-cart[data-product-id], .action.add-to-cart[data-product-index]');
             if (cartButton) {
-                const productIndex = parseInt(cartButton.getAttribute('data-product-index'));
-                if (productIndex) {
+                const productId = cartButton.getAttribute('data-product-id');
+                const productIndex = cartButton.getAttribute('data-product-index');
+                const idOrIndex = productId ? parseInt(productId, 10) : (productIndex ? parseInt(productIndex, 10) : null);
+                if (idOrIndex) {
                     const modal = document.querySelector('#exampleModal-Cart');
                     if (modal) {
                         const handleModalShow = function() {
-                            loadProductInModal(productIndex, 'cart');
+                            loadProductInModal(idOrIndex, 'cart', productId ? 'id' : 'index');
                             modal.removeEventListener('shown.bs.modal', handleModalShow);
                         };
                         modal.addEventListener('shown.bs.modal', handleModalShow);
@@ -272,15 +297,18 @@ function loadModals() {
                 }
             }
             
-            // Manejar Wishlist
-            const wishlistButton = e.target.closest('.action.wishlist[data-product-index]');
+            // Manejar Wishlist (soporta data-product-id o data-product-index)
+            const wishlistButton = e.target.closest('.action.wishlist[data-product-id], .action.wishlist[data-product-index]');
             if (wishlistButton) {
-                const productIndex = parseInt(wishlistButton.getAttribute('data-product-index'));
-                if (productIndex) {
+                const wishlistProductId = wishlistButton.getAttribute('data-product-id');
+                const wishlistProductIndex = wishlistButton.getAttribute('data-product-index');
+                const wishlistIdOrIndex = wishlistProductId ? parseInt(wishlistProductId, 10) : (wishlistProductIndex ? parseInt(wishlistProductIndex, 10) : null);
+                if (wishlistIdOrIndex) {
                     const modal = document.querySelector('#exampleModal-Wishlist');
                     if (modal) {
                         const handleModalShow = function() {
-                            loadProductInModal(productIndex, 'wishlist');
+                            loadProductInModal(wishlistIdOrIndex, 'wishlist', wishlistProductId ? 'id' : 'index');
+                            saveToWishlist(wishlistIdOrIndex);
                             modal.removeEventListener('shown.bs.modal', handleModalShow);
                         };
                         modal.addEventListener('shown.bs.modal', handleModalShow);
@@ -288,15 +316,17 @@ function loadModals() {
                 }
             }
             
-            // Manejar Compare
-            const compareButton = e.target.closest('.action.compare[data-product-index]');
+            // Manejar Compare (soporta data-product-id o data-product-index)
+            const compareButton = e.target.closest('.action.compare[data-product-id], .action.compare[data-product-index]');
             if (compareButton) {
-                const productIndex = parseInt(compareButton.getAttribute('data-product-index'));
-                if (productIndex) {
+                const compareProductId = compareButton.getAttribute('data-product-id');
+                const compareProductIndex = compareButton.getAttribute('data-product-index');
+                const compareIdOrIndex = compareProductId ? parseInt(compareProductId, 10) : (compareProductIndex ? parseInt(compareProductIndex, 10) : null);
+                if (compareIdOrIndex) {
                     const modal = document.querySelector('#exampleModal-Compare');
                     if (modal) {
                         const handleModalShow = function() {
-                            loadProductInModal(productIndex, 'compare');
+                            loadProductInModal(compareIdOrIndex, 'compare', compareProductId ? 'id' : 'index');
                             modal.removeEventListener('shown.bs.modal', handleModalShow);
                         };
                         modal.addEventListener('shown.bs.modal', handleModalShow);

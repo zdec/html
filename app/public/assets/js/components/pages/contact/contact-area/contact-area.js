@@ -10,7 +10,7 @@ function loadContactArea() {
     }
     
     // Ruta al archivo HTML del componente
-    const contactAreaHTMLPath = 'assets/js/components/pages/contact/contact-area/contact-area.html';
+    const contactAreaHTMLPath = '/assets/js/components/pages/contact/contact-area/contact-area.html';
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
