@@ -19,10 +19,17 @@
     <link rel="stylesheet" href="{{ asset('assets/css/jquery-ui.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        /* Header: min-height solo en desktop; en tablets/móvil se adapta al contenido */
+        .header-container-adaptive { min-height: 0; }
+        @media (min-width: 769px) {
+            .header-container-adaptive { min-height: 195px; }
+        }
+    </style>
 </head>
 <body>
     <div class="main-wrapper">
-        <div id="header-container" style="min-height: 195px;"></div>
+        <div id="header-container" class="header-container-adaptive"></div>
         @yield('content')
         <div id="footer-container"></div>
     </div>

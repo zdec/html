@@ -24,25 +24,29 @@ function loadFooter() {
             socialInstagram: SiteConfig.social.instagram || '#',
             footerServices: (() => {
                 if (!SiteConfig.footer.services) return '';
-                // Filtrar solo los servicios habilitados (enabled: true o undefined)
-                // Excluir explícitamente los que tienen enabled: false
+                const auth = SiteConfig.auth || {};
+                const accountText = SiteConfig.texts.accountText || 'Mi Cuenta';
+                const accountHref = (auth.check && auth.adminUrl) ? auth.adminUrl : '/login';
                 const enabledServices = SiteConfig.footer.services.filter(service => {
                     return service.enabled === true || service.enabled === undefined;
                 });
-                return enabledServices.map(service => 
-                    `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
-                ).join('');
+                return enabledServices.map(service => {
+                    const href = (service.text === accountText) ? accountHref : (service.realhref || service.href);
+                    return `<li class="li"><a class="single-link" href="${href}">${service.text}</a></li>`;
+                }).join('');
             })(),
             footerMyAccount: (() => {
                 if (!SiteConfig.footer.services) return '';
-                // Filtrar solo los servicios habilitados (enabled: true o undefined)
-                // Excluir explícitamente los que tienen enabled: false
+                const auth = SiteConfig.auth || {};
+                const accountText = SiteConfig.texts.accountText || 'Mi Cuenta';
+                const accountHref = (auth.check && auth.adminUrl) ? auth.adminUrl : '/login';
                 const enabledServices = SiteConfig.footer.services.filter(service => {
                     return service.enabled === true || service.enabled === undefined;
                 });
-                return enabledServices.map(service => 
-                    `<li class="li"><a class="single-link" href="${service.href}" realhref="${service.realhref}">${service.text}</a></li>`
-                ).join('');
+                return enabledServices.map(service => {
+                    const href = (service.text === accountText) ? accountHref : (service.realhref || service.href);
+                    return `<li class="li"><a class="single-link" href="${href}">${service.text}</a></li>`;
+                }).join('');
             })(),
             contactAddress: SiteConfig.contact.address || '',
             phone: SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '',

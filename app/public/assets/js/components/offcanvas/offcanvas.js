@@ -124,12 +124,16 @@ function loadOffcanvas() {
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
         // Preparar los datos para reemplazar los placeholders
+        const auth = SiteConfig.auth || {};
+        const accountText = SiteConfig.texts.accountText || 'Mi Cuenta';
+        const accountHref = (auth.check && auth.adminUrl) ? auth.adminUrl : '/login';
         const data = {
             wishlistText: SiteConfig.texts.wishlistText || 'Me gusta',
             phone: SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '',
             phoneClean: (SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '').replace(/\s/g, ''),
             email: SiteConfig.contact.email || '',
-            accountText: SiteConfig.texts.accountText || 'Mi Cuenta',
+            accountText: accountText,
+            accountHref: accountHref,
             menuItems: SiteConfig.menu ? SiteConfig.menu.map(item => 
                 `<li><a href="${item.href}">${item.text}</a></li>`
             ).join('') : '',
