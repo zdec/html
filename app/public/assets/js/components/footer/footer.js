@@ -61,12 +61,17 @@ function loadFooter() {
             processedHTML = processedHTML.replace(placeholder, data[key]);
         });
         
-        // Insertar el footer antes del cierre de main-wrapper
-        const mainWrapper = document.querySelector('.main-wrapper');
-        if (mainWrapper) {
-            mainWrapper.insertAdjacentHTML('beforeend', processedHTML);
+        // Insertar el footer en el contenedor reservado (evita parpadeo)
+        const footerContainer = document.getElementById('footer-container');
+        if (footerContainer) {
+            footerContainer.innerHTML = processedHTML;
         } else {
-            console.error('No se encontró .main-wrapper para insertar el footer');
+            const mainWrapper = document.querySelector('.main-wrapper');
+            if (mainWrapper) {
+                mainWrapper.insertAdjacentHTML('beforeend', processedHTML);
+            } else {
+                console.error('No se encontró .main-wrapper ni #footer-container para insertar el footer');
+            }
         }
     }
     

@@ -18,10 +18,13 @@
     <link rel="stylesheet" href="{{ asset('assets/css/venobox.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/jquery-ui.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="main-wrapper">
+        <div id="header-container" style="min-height: 195px;"></div>
         @yield('content')
+        <div id="footer-container"></div>
     </div>
 
     <script>
@@ -54,6 +57,12 @@
                 },
             },
             products: { items: @json($productsForSearch ?? []) },
+            auth: {
+                check: @json(auth()->check()),
+                logoutUrl: @json(route('logout')),
+                adminUrl: @json(route('admin.orders.index')),
+                csrfToken: document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : ''
+            },
         };
     </script>
     <script src="{{ asset('assets/js/vendor/bootstrap.bundle.min.js') }}"></script>

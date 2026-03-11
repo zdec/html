@@ -19,12 +19,20 @@ function loadHeader() {
         // Verificar si se debe mostrar el botón del carrito (por defecto false si no está configurado)
         const showCart = SiteConfig.header && SiteConfig.header.showCart === true;
         
+        const auth = SiteConfig.auth || {};
+        const isLoggedIn = auth.check === true;
+        const accountText = SiteConfig.texts.accountText || 'Mi Cuenta';
+        const accountNav = isLoggedIn && auth.adminUrl
+            ? '<li><a href="' + auth.adminUrl + '"><i class="fa fa-user"></i> ' + accountText + '</a></li>'
+            : '<li><a href="/login"><i class="fa fa-user"></i> ' + accountText + '</a></li>';
+
         const data = {
             welcomeMessage: SiteConfig.texts.welcomeMessage || '',
             phone: SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '',
             phoneClean: (SiteConfig.contact.phoneFormatted || SiteConfig.contact.phone || '').replace(/\s/g, ''),
             email: SiteConfig.contact.email || '',
             accountText: SiteConfig.texts.accountText || 'Mi Cuenta',
+            accountNav: accountNav,
             logo: SiteConfig.images.logo || '/assets/images/logo/logo.png',
             menuItems: SiteConfig.menu ? SiteConfig.menu.map(item => 
                 `<li><a href="${item.href}">${item.text}</a></li>`
@@ -52,12 +60,17 @@ function loadHeader() {
         // Verificar que no queden placeholders sin reemplazar y limpiarlos
         processedHTML = processedHTML.replace(/{{[^}]+}}/g, '');
         
-        // Insertar el header al inicio del main-wrapper
-        const mainWrapper = document.querySelector('.main-wrapper');
-        if (mainWrapper) {
-            mainWrapper.insertAdjacentHTML('afterbegin', processedHTML);
+        // Insertar el header en el contenedor reservado (evita parpadeo al no desplazar el contenido)
+        const headerContainer = document.getElementById('header-container');
+        if (headerContainer) {
+            headerContainer.innerHTML = processedHTML;
         } else {
-            console.error('No se encontró .main-wrapper para insertar el header');
+            const mainWrapper = document.querySelector('.main-wrapper');
+            if (mainWrapper) {
+                mainWrapper.insertAdjacentHTML('afterbegin', processedHTML);
+            } else {
+                console.error('No se encontró .main-wrapper ni #header-container para insertar el header');
+            }
         }
     }
     
