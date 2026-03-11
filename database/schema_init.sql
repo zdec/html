@@ -909,7 +909,7 @@ COPY public.tags (id, name, slug, created_at, updated_at) FROM stdin;
 --
 
 COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM stdin;
-1	Test User	test@example.com	2026-03-09 23:41:31	$2y$12$5uFBHvI49Xec5lJhLiQaguM7t7lgZTB7ihTqJJ0D0PW3jkJ6c1/HK	VhWTPKRiFE	2026-03-09 23:41:31	2026-03-09 23:41:31
+1	Admin	admin@itsecursas.co	2026-03-09 23:41:31	$2y$10$1WWObiLaNYC2ZTsaHKLEPOLfj86bLjjMxwYR3ULRTSeKm90SoYEWm	\N	2026-03-09 23:41:31	2026-03-09 23:41:31
 \.
 
 
