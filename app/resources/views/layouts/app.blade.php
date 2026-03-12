@@ -7,17 +7,18 @@
     <title>@yield('title', 'IT Secur')</title>
     <meta name="robots" content="index, follow" />
     <meta name="description" content="@yield('description', 'IT Secur - Tienda en línea de articulos de seguridad')">
-    <link rel="shortcut icon" href="{{ asset('assets/images/logo/icono.png') }}" type="image/png">
-    <link rel="icon" href="{{ asset('assets/images/logo/icono.png') }}" type="image/png">
+    <link rel="shortcut icon" href="/assets/images/logo/icono.png" type="image/png">
+    <link rel="icon" href="/assets/images/logo/icono.png" type="image/png">
 
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/font.awesome.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/pe-icon-7-stroke.css') }}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/animate.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/venobox.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/jquery-ui.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/font.awesome.css" />
+    <link rel="stylesheet" href="/assets/css/pe-icon-7-stroke.css" />
+    <link rel="stylesheet" href="/assets/css/animate.min.css">
+    <link rel="stylesheet" href="/assets/css/swiper-bundle.min.css">
+    <link rel="stylesheet" href="/assets/css/venobox.css">
+    <link rel="stylesheet" href="/assets/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    @stack('styles')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         /* Header: min-height solo en desktop; en tablets/móvil se adapta al contenido */
@@ -72,26 +73,26 @@
             },
         };
     </script>
-    <script src="{{ asset('assets/js/vendor/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendor/jquery-3.6.0.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendor/jquery-migrate-3.3.2.min.js') }}"></script>
-    <script src="{{ asset('assets/js/vendor/modernizr-3.11.2.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/jquery.countdown.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/swiper-bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/scrollUp.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/venobox.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/jquery-ui.min.js') }}"></script>
-    <script src="{{ asset('assets/js/plugins/mailchimp-ajax.js') }}"></script>
+    <script src="/assets/js/vendor/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/vendor/jquery-3.6.0.min.js"></script>
+    <script src="/assets/js/vendor/jquery-migrate-3.3.2.min.js"></script>
+    <script src="/assets/js/vendor/modernizr-3.11.2.min.js"></script>
+    <script src="/assets/js/plugins/jquery.countdown.min.js"></script>
+    <script src="/assets/js/plugins/swiper-bundle.min.js"></script>
+    <script src="/assets/js/plugins/scrollUp.js"></script>
+    <script src="/assets/js/plugins/venobox.min.js"></script>
+    <script src="/assets/js/plugins/jquery-ui.min.js"></script>
+    <script src="/assets/js/plugins/mailchimp-ajax.js"></script>
 
-    <script src="{{ asset('assets/js/components/whatsapp-button/whatsapp-button.js') }}"></script>
-    <script src="{{ asset('assets/js/components/header/header.js') }}"></script>
-    <script src="{{ asset('assets/js/components/offcanvas/offcanvas.js') }}"></script>
-    <script src="{{ asset('assets/js/components/footer/footer.js') }}"></script>
-    <script src="{{ asset('assets/js/components/modals/modals.js') }}"></script>
+    <script src="/assets/js/components/whatsapp-button/whatsapp-button.js"></script>
+    <script src="/assets/js/components/header/header.js"></script>
+    <script src="/assets/js/components/offcanvas/offcanvas.js"></script>
+    <script src="/assets/js/components/footer/footer.js"></script>
+    <script src="/assets/js/components/modals/modals.js"></script>
     @stack('scripts')
-    <script src="{{ asset('assets/js/components/components.js') }}"></script>
-    <script src="{{ asset('assets/js/components/sliders-init.js') }}"></script>
-    <script src="{{ asset('assets/js/components/modal-accessibility-fix.js') }}"></script>
-    <script src="{{ asset('assets/js/main.js') }}"></script>
+    <script src="/assets/js/components/components.js"></script>
+    <script src="/assets/js/components/sliders-init.js"></script>
+    <script src="/assets/js/components/modal-accessibility-fix.js"></script>
+    <script src="/assets/js/main.js"></script>
 </body>
 </html>

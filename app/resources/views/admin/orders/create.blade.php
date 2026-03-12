@@ -10,68 +10,78 @@
 @endsection
 
 @section('admin_content')
-<h4>Nueva orden</h4>
+<style>
+.item-row .remove-item { opacity: 0.4; transition: opacity 0.2s; }
+.item-row:hover .remove-item { opacity: 1; }
+#add-item { opacity: 0.7; transition: opacity 0.2s; }
+#add-item:hover { opacity: 1; }
+</style>
 
-<form method="POST" action="{{ route('admin.orders.store') }}">
-    @csrf
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <div class="default-form-box mb-20">
-                <label for="email_guest">Email (invitado)</label>
-                <input type="email" name="email_guest" id="email_guest" class="form-control" value="{{ old('email_guest') }}">
+<div class="billing-info-wrap">
+    <h4 class="mb-4">Nueva orden</h4>
+    <form method="POST" action="{{ route('admin.orders.store') }}">
+        @csrf
+        <h5 class="mb-3">Datos del pedido</h5>
+        <div class="row">
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="default-form-box">
+                    <label for="email_guest">Email (invitado)</label>
+                    <input type="email" name="email_guest" id="email_guest" class="form-control" value="{{ old('email_guest') }}" placeholder="Email del cliente si es invitado">
+                </div>
+                @error('email_guest')<div class="text-danger small">{{ $message }}</div>@enderror
             </div>
-            @error('email_guest')
-                <div class="text-danger small">{{ $message }}</div>
-            @enderror
-        </div>
-        <div class="col-md-6 mb-3">
-            <div class="default-form-box mb-20">
-                <label for="notes">Notas</label>
-                <input type="text" name="notes" id="notes" class="form-control" value="{{ old('notes') }}">
-            </div>
-        </div>
-    </div>
-
-    <h5 class="mb-2">Items</h5>
-    <div id="items-container">
-        <div class="row item-row mb-2">
-            <div class="col-md-6">
-                <div class="default-form-box mb-20">
-                    <select name="items[0][product_id]" class="form-select" required>
-                        <option value="">Seleccionar producto</option>
-                        @foreach ($products as $p)
-                            <option value="{{ $p->id }}" data-price="{{ $p->price }}">{{ $p->name }} - ${{ number_format($p->price, 0, ',', ',') }}</option>
-                        @endforeach
-                    </select>
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="default-form-box">
+                    <label for="notes">Notas</label>
+                    <input type="text" name="notes" id="notes" class="form-control" value="{{ old('notes') }}" placeholder="Notas del pedido">
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="default-form-box mb-20">
-                    <input type="number" name="items[0][qty]" class="form-control" placeholder="Cantidad" min="1" value="1" required>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <button type="button" class="btn btn-outline-danger btn-sm remove-item">Quitar</button>
-            </div>
         </div>
-    </div>
-    <button type="button" class="btn btn-outline-dark btn-sm mt-2" id="add-item">+ Añadir item</button>
 
-    @error('items')
-        <div class="text-danger small mt-2">{{ $message }}</div>
-    @enderror
+        <h5 class="mb-3">Items de la orden</h5>
+        <div class="table-content table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th style="width: 120px;">Cantidad</th>
+                        <th style="width: 100px;">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="items-container">
+                    <tr class="item-row">
+                        <td>
+                            <select name="items[0][product_id]" class="form-select form-select-sm" required>
+                                <option value="">Seleccionar producto</option>
+                                @foreach ($products as $p)
+                                    <option value="{{ $p->id }}" data-price="{{ $p->price }}">{{ $p->name }} - ${{ number_format($p->price, 0, ',', ',') }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" name="items[0][qty]" class="form-control form-control-sm" min="1" value="1" required>
+                        </td>
+                        <td><button type="button" class="btn btn-outline-danger btn-sm remove-item">Quitar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="mb-2"><button type="button" class="btn btn-outline-dark btn-sm" id="add-item">+ Añadir ítem</button></p>
 
-    <div class="save_button mt-4">
-        <button type="submit" class="btn btn-dark btn-hover-primary">Crear orden</button>
-        <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-dark ms-2">Cancelar</a>
-    </div>
-</form>
+        @error('items')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
+
+        <div class="save_button mt-4">
+            <button type="submit" class="btn btn-dark btn-hover-primary">Crear orden</button>
+            <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-dark ms-2">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     let index = 1;
-    const container = document.getElementById('items-container');
+    const tbody = document.getElementById('items-container');
     const addBtn = document.getElementById('add-item');
     const productOptions = @json($productOptions);
 
@@ -87,29 +97,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     addBtn.addEventListener('click', function() {
-        const row = document.createElement('div');
-        row.className = 'row item-row mb-2';
-        let opts = '<option value="">Seleccionar producto</option>';
-        productOptions.forEach(function(p) {
-            opts += buildOption(p);
-        });
-        row.innerHTML =
-            '<div class="col-md-6"><div class="default-form-box mb-20">' +
-                '<select name="items[' + index + '][product_id]" class="form-select" required>' + opts + '</select>' +
-            '</div></div>' +
-            '<div class="col-md-3"><div class="default-form-box mb-20">' +
-                '<input type="number" name="items[' + index + '][qty]" class="form-control" placeholder="Cantidad" min="1" value="1" required>' +
-            '</div></div>' +
-            '<div class="col-md-3">' +
-                '<button type="button" class="btn btn-outline-danger btn-sm remove-item">Quitar</button>' +
-            '</div>';
-        container.appendChild(row);
+        var opts = '<option value="">Seleccionar producto</option>';
+        productOptions.forEach(function(p) { opts += buildOption(p); });
+        var tr = document.createElement('tr');
+        tr.className = 'item-row';
+        tr.innerHTML =
+            '<td><select name="items[' + index + '][product_id]" class="form-select form-select-sm" required>' + opts + '</select></td>' +
+            '<td><input type="number" name="items[' + index + '][qty]" class="form-control form-control-sm" min="1" value="1" required></td>' +
+            '<td><button type="button" class="btn btn-outline-danger btn-sm remove-item">Quitar</button></td>';
+        tbody.appendChild(tr);
         index++;
     });
 
-    container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-item') && container.querySelectorAll('.item-row').length > 1) {
-            e.target.closest('.item-row').remove();
+    tbody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item') && tbody.querySelectorAll('.item-row').length > 1) {
+            e.target.closest('tr').remove();
         }
     });
 });

@@ -43,18 +43,18 @@ function loadBannerArea() {
                 // insertar después del header como fallback seguro
                 clearInterval(checkInterval);
                 const header = document.querySelector('header');
+                const headerContainer = document.getElementById('header-container');
                 if (header) {
-                    // Insertar después del header (el hero slider debería estar ahí)
                     header.insertAdjacentHTML('afterend', html);
+                } else if (headerContainer) {
+                    headerContainer.insertAdjacentHTML('afterend', html);
                 } else {
                     const mainWrapper = document.querySelector('.main-wrapper');
                     if (mainWrapper) {
-                        // Buscar cualquier sección existente y insertar después
                         const firstSection = mainWrapper.querySelector('.section, .hero-slider, .fashion-area');
                         if (firstSection) {
                             firstSection.insertAdjacentHTML('afterend', html);
                         } else {
-                            // Último recurso: insertar al inicio del main-wrapper
                             mainWrapper.insertAdjacentHTML('afterbegin', html);
                         }
                     } else {

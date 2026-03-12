@@ -19,6 +19,6 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/components/pages/contact/contact-area/contact-area.js') }}"></script>
-<script src="{{ asset('assets/js/components/pages/contact/map-area/map-area.js') }}"></script>
+<script src="/assets/js/components/pages/contact/contact-area/contact-area.js"></script>
+    <script src="/assets/js/components/pages/contact/map-area/map-area.js"></script>
 @endpush

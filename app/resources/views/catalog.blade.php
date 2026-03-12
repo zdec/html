@@ -19,5 +19,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/components/pages/catalog/shop-page/shop-page.js') }}"></script>
+<script src="/assets/js/components/pages/catalog/shop-page/shop-page.js"></script>
 @endpush

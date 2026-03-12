@@ -53,23 +53,23 @@
     </table>
 </div>
 
-@if (in_array($order->status, ['draft', 'pedido', 'remision']))
 <div class="d-flex gap-2">
-    @if (in_array($order->status, ['draft', 'pedido']))
-        <form method="POST" action="{{ route('admin.orders.generate-remision', $order) }}" class="d-inline">
-            @csrf
-            <button type="submit" class="btn btn-dark btn-hover-primary">Generar remisión</button>
-        </form>
-    @endif
-    @if (in_array($order->status, ['draft', 'pedido', 'remision']))
-        <form method="POST" action="{{ route('admin.orders.register-venta', $order) }}" class="d-inline">
-            @csrf
-            <button type="submit" class="btn btn-dark btn-hover-primary">Registrar venta</button>
-        </form>
+    @if(auth()->user()->is_admin && in_array($order->status, ['draft', 'pedido', 'remision']))
+        @if (in_array($order->status, ['draft', 'pedido']))
+            <form method="POST" action="{{ route('admin.orders.generate-remision', $order) }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-dark btn-hover-primary">Generar remisión</button>
+            </form>
+        @endif
+        @if (in_array($order->status, ['draft', 'pedido', 'remision']))
+            <form method="POST" action="{{ route('admin.orders.register-venta', $order) }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-dark btn-hover-primary">Registrar venta</button>
+            </form>
+        @endif
     @endif
     <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-dark">Volver a órdenes</a>
 </div>
-@endif
 
 @if ($order->notes)
 <p class="mt-4 text-muted"><strong>Notas:</strong> {{ $order->notes }}</p>

@@ -9,12 +9,14 @@ function loadHeroSlider() {
     
     // Función para insertar el HTML, procesar data-bg-image e inicializar Swiper
     function insertHTML(html) {
-        // Insertar el hero slider después del header/offcanvas
+        // Insertar el hero slider siempre después del contenedor del header (evita que quede debajo al recargar)
+        const headerContainer = document.getElementById('header-container');
         const header = document.querySelector('header');
         if (header) {
             header.insertAdjacentHTML('afterend', html);
+        } else if (headerContainer) {
+            headerContainer.insertAdjacentHTML('afterend', html);
         } else {
-            // Si no hay header, insertar al inicio del main-wrapper
             const mainWrapper = document.querySelector('.main-wrapper');
             if (mainWrapper) {
                 mainWrapper.insertAdjacentHTML('afterbegin', html);

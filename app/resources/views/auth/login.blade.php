@@ -4,21 +4,56 @@
 
 @section('content')
 <style>
-.password-input-wrapper { position: relative; }
-.password-input-wrapper input { padding-right: 42px; width: 100%; }
+/* Mismo aspecto que el resto de inputs del formulario (border, margen) */
+.password-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ebebeb;
+    margin-bottom: 30px;
+    background-color: transparent;
+    min-height: 44px;
+}
+.password-input-wrapper:focus-within { border-color: #266bf9; }
+.password-input-wrapper input {
+    flex: 1;
+    min-width: 0;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 15px;
+    background: none !important;
+    font-size: 14px;
+    color: #3a3a3a;
+    outline: none;
+}
 .password-toggle-btn {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: none;
     border: none;
-    padding: 0;
+    border-left: 1px solid #ebebeb;
     cursor: pointer;
     color: #666;
     font-size: 1.1rem;
 }
 .password-toggle-btn:hover { color: #333; }
+.password-toggle-btn i { pointer-events: none; }
+/* Botón Entrar a todo el ancho del formulario */
+.login-register-form .button-box button[type="submit"] {
+    width: 100%;
+    display: block;
+}
+/* Enlace "Volver al inicio" centrado bajo el botón */
+.login-register-form .login-back-link {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 0;
+}
 </style>
 {{-- Breadcrumb --}}
 <div class="breadcrumb-area">
@@ -71,13 +106,14 @@
                                         </div>
                                         <div class="button-box">
                                             <div class="login-toggle-btn">
+                                                <input type="hidden" name="remember" value="0">
                                                 <input type="checkbox" name="remember" id="remember" value="1" {{ old('remember') ? 'checked' : '' }} />
                                                 <label class="flote-none" for="remember">Recordarme</label>
                                             </div>
                                             <button type="submit"><span>Entrar</span></button>
                                         </div>
                                     </form>
-                                    <p class="mt-3 mb-0">
+                                    <p class="login-back-link">
                                         <a href="{{ route('home') }}">Volver al inicio</a>
                                     </p>
                                 </div>

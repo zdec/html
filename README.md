@@ -34,15 +34,16 @@ docker compose up
 
 ### 3. Acceder a la aplicación
 
-- **URL:** http://localhost:8000
-- La aplicación Laravel estará disponible en el puerto 8000.
+- **URL:** http://localhost:8080
+- La aplicación Laravel estará disponible en el puerto 8080 (configurable con la variable `PORT` en el `.env`).
 
 ### 4. Primera ejecución
 
-En la primera ejecución genera la clave de la aplicación:
+En la primera ejecución genera la clave de la aplicación y el enlace de almacenamiento (imágenes de productos en admin):
 
 ```bash
 docker compose exec app php artisan key:generate
+docker compose exec app php artisan storage:link
 ```
 
 La base de datos se inicializa automáticamente con `database/schema_init.sql` al levantar PostgreSQL por primera vez. No se usan migraciones ni seeders.
@@ -85,6 +86,11 @@ El script `docker-dev.sh` ejecuta `docker compose up` y muestra la URL de acceso
 - Poder añadir validaciones (por ejemplo, comprobar que existe `.env`)
 
 Uso: `./docker-dev.sh` o `bash docker-dev.sh`
+
+## Producción / despliegue
+
+- **Imágenes de productos:** Se guardan en `storage/app/public/products/`. Es necesario ejecutar `php artisan storage:link` para que la ruta `public/storage` apunte a ese directorio (en Docker: `docker compose exec app php artisan storage:link`).
+- En producción puede configurarse otro disco (S3, etc.) en `config/filesystems.php` y usar el mismo flujo de subida.
 
 ## Documentación adicional
 

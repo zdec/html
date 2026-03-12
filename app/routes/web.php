@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminBillingController;
+use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ContactController;
@@ -25,10 +29,28 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('orders', AdminOrderController::class)->only(['index', 'create', 'store', 'show']);
-        Route::post('orders/{order}/remision', [AdminOrderController::class, 'generateRemision'])->name('orders.generate-remision');
-        Route::post('orders/{order}/venta', [AdminOrderController::class, 'registerVenta'])->name('orders.register-venta');
-        Route::get('productos', [AdminProductController::class, 'index'])->name('products.index');
-        Route::post('productos/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.update-stock');
+        // Órdenes: listado y detalle para todos (filtrado en controlador); crear y flujo solo admin
+        Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create')->middleware('admin');
+        Route::post('orders', [AdminOrderController::class, 'store'])->name('orders.store')->middleware('admin');
+        Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{order}/remision', [AdminOrderController::class, 'generateRemision'])->name('orders.generate-remision')->middleware('admin');
+        Route::post('orders/{order}/venta', [AdminOrderController::class, 'registerVenta'])->name('orders.register-venta')->middleware('admin');
+
+        // Perfil: todos
+        Route::get('perfil', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('perfil', [ProfileController::class, 'update'])->name('profile.update');
+
+        // Facturación: solo clientes (controlador redirige si admin)
+        Route::get('facturacion', [AdminBillingController::class, 'index'])->name('billing.index');
+
+        // Solo administradores
+        Route::middleware('admin')->group(function () {
+            Route::get('productos/{product}/modal', [AdminProductController::class, 'modal'])->name('products.modal');
+            Route::resource('productos', AdminProductController::class)->names('products')->parameters(['producto' => 'product']);
+            Route::post('productos/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.update-stock');
+            Route::resource('users', AdminUserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            Route::resource('customers', AdminCustomerController::class)->only(['index', 'edit', 'update']);
+        });
     });
 });

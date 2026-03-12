@@ -9,7 +9,12 @@
 @endsection
 
 @section('admin_content')
-<h4>Órdenes</h4>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <h4 class="mb-0">Órdenes</h4>
+    @if(auth()->user()->is_admin)
+    <a href="{{ route('admin.orders.create') }}" class="btn btn-dark btn-hover-primary">Nueva orden</a>
+    @endif
+</div>
 
 <form method="GET" class="mb-4 d-flex gap-2 flex-wrap align-items-end">
     <div>

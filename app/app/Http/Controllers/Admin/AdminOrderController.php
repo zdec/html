@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\OrderFlowService;
@@ -16,6 +17,8 @@ class AdminOrderController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Order::class);
+
         $products = Product::with('category')->where('active', true)->orderBy('name')->get();
 
         $productOptions = $products->map(fn ($p) => [
@@ -27,20 +30,14 @@ class AdminOrderController extends Controller
         return view('admin.orders.create', compact('products', 'productOptions'));
     }
 
-    public function store(Request $request)
+    public function store(StoreOrderRequest $request)
     {
-        $request->validate([
-            'email_guest' => ['nullable', 'email'],
-            'notes' => ['nullable', 'string'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'exists:products,id'],
-            'items.*.qty' => ['required', 'integer', 'min:1'],
-        ]);
+        $validated = $request->validated();
 
         $total = 0;
         $orderItems = [];
 
-        foreach ($request->items as $item) {
+        foreach ($validated['items'] as $item) {
             $product = Product::findOrFail($item['product_id']);
             $qty = (int) $item['qty'];
             $subtotal = $product->price * $qty;
@@ -54,10 +51,10 @@ class AdminOrderController extends Controller
         }
 
         $order = Order::create([
-            'email_guest' => $request->email_guest,
+            'email_guest' => $validated['email_guest'] ?? null,
             'status' => Order::STATUS_PEDIDO,
             'total' => $total,
-            'notes' => $request->notes,
+            'notes' => $validated['notes'] ?? null,
             'source' => 'admin',
         ]);
 
@@ -72,6 +69,16 @@ class AdminOrderController extends Controller
     {
         $query = Order::with(['customer', 'items.product'])->latest();
 
+        if (! $request->user()->is_admin) {
+            $customer = $request->user()->customer;
+            if (! $customer) {
+                $orders = $query->whereRaw('1 = 0')->paginate(20);
+
+                return view('admin.orders.index', compact('orders'));
+            }
+            $query->where('customer_id', $customer->id);
+        }
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -83,6 +90,8 @@ class AdminOrderController extends Controller
 
     public function show(Order $order)
     {
+        $this->authorize('view', $order);
+
         $order->load(['customer', 'items.product', 'inventoryMovements', 'salesDocuments']);
 
         return view('admin.orders.show', compact('order'));
@@ -90,6 +99,8 @@ class AdminOrderController extends Controller
 
     public function generateRemision(Order $order)
     {
+        $this->authorize('update', $order);
+
         if (! in_array($order->status, [Order::STATUS_PEDIDO, Order::STATUS_DRAFT])) {
             return back()->with('error', 'Solo se puede generar remisión desde pedido o borrador.');
         }
@@ -101,6 +112,8 @@ class AdminOrderController extends Controller
 
     public function registerVenta(Order $order)
     {
+        $this->authorize('update', $order);
+
         if (! in_array($order->status, [Order::STATUS_PEDIDO, Order::STATUS_DRAFT, Order::STATUS_REMISION])) {
             return back()->with('error', 'No se puede registrar venta desde este estado.');
         }

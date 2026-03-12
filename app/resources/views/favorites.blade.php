@@ -19,5 +19,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/components/pages/favorites/favorites-page.js') }}"></script>
+<script src="/assets/js/components/pages/favorites/favorites-page.js"></script>
 @endpush

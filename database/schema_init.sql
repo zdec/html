@@ -368,6 +368,7 @@ CREATE TABLE public.users (
     email_verified_at timestamp(0) without time zone,
     password character varying(255) NOT NULL,
     remember_token character varying(100),
+    is_admin boolean DEFAULT false NOT NULL,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone
 );
@@ -908,8 +909,8 @@ COPY public.tags (id, name, slug, created_at, updated_at) FROM stdin;
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.users (id, name, email, email_verified_at, password, remember_token, created_at, updated_at) FROM stdin;
-1	Admin	admin@itsecursas.co	2026-03-09 23:41:31	$2y$10$1WWObiLaNYC2ZTsaHKLEPOLfj86bLjjMxwYR3ULRTSeKm90SoYEWm	\N	2026-03-09 23:41:31	2026-03-09 23:41:31
+COPY public.users (id, name, email, email_verified_at, password, remember_token, is_admin, created_at, updated_at) FROM stdin;
+1	Admin	admin@itsecursas.co	2026-03-09 23:41:31	$2y$10$1WWObiLaNYC2ZTsaHKLEPOLfj86bLjjMxwYR3ULRTSeKm90SoYEWm	\N	t	2026-03-09 23:41:31	2026-03-09 23:41:31
 \.
 
 

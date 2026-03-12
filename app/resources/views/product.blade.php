@@ -35,8 +35,8 @@
                             </div>
                         @empty
                             <div class="swiper-slide">
-                                <img class="img-responsive m-auto" src="{{ asset('assets/images/products/1/1.webp') }}" alt="{{ $product->name }}">
-                                <a class="venobox full-preview" data-gall="myGallery" href="{{ asset('assets/images/products/1/1.webp') }}"><i class="fa fa-arrows-alt" aria-hidden="true"></i></a>
+                                <img class="img-responsive m-auto" src="/assets/images/products/1/1.webp" alt="{{ $product->name }}">
+                                <a class="venobox full-preview" data-gall="myGallery" href="/assets/images/products/1/1.webp"><i class="fa fa-arrows-alt" aria-hidden="true"></i></a>
                             </div>
                         @endforelse
                     </div>
@@ -46,7 +46,7 @@
                         @forelse($product->images->sortBy('order') as $image)
                             <div class="swiper-slide"><img class="img-responsive m-auto" src="{{ asset($image->path) }}" alt="{{ $product->name }}"></div>
                         @empty
-                            <div class="swiper-slide"><img class="img-responsive m-auto" src="{{ asset('assets/images/products/1/1.webp') }}" alt="{{ $product->name }}"></div>
+                            <div class="swiper-slide"><img class="img-responsive m-auto" src="/assets/images/products/1/1.webp" alt="{{ $product->name }}"></div>
                         @endforelse
                     </div>
                     <div class="swiper-buttons">

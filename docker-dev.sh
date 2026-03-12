@@ -23,7 +23,7 @@ if ! docker compose version &> /dev/null; then
 fi
 
 echo "Docker detectado."
-echo "URL de acceso: http://localhost:8000"
+echo "URL de acceso: http://localhost:8080"
 echo ""
 echo "Presiona Ctrl+C para detener el entorno."
 echo ""

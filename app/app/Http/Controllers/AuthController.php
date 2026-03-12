@@ -20,7 +20,9 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+        $remember = $request->boolean('remember');
+
+        if (! Auth::attempt($request->only('email', 'password'), $remember)) {
             throw ValidationException::withMessages([
                 'email' => __('Las credenciales no coinciden.'),
             ]);

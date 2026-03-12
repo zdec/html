@@ -1,5 +1,41 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+/* Botones en área admin: visibles y tamaño coherente con checkout/order-tracking */
+.account-dashboard .dashboard_content .btn,
+.account-dashboard .dashboard_content .table .btn {
+    width: auto;
+    height: auto;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    background-color: #212529;
+    color: #fff !important;
+    border: 1px solid #212529;
+    border-radius: 4px;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.account-dashboard .dashboard_content .btn:hover,
+.account-dashboard .dashboard_content .btn.btn-hover-primary:hover {
+    background-color: #266bf9;
+    border-color: #266bf9;
+    color: #fff !important;
+}
+.account-dashboard .dashboard_content .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+.account-dashboard .dashboard_content .btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #bb2d3b;
+    color: #fff !important;
+}
+</style>
+@endpush
+
 @section('content')
 {{-- Breadcrumb (estilo my-account). Sin components-loading para evitar que se oculte y reaparezca al cambiar de menú. --}}
 <div class="breadcrumb-area">
@@ -23,9 +59,17 @@
             <div class="col-sm-12 col-md-3 col-lg-3">
                 <div class="dashboard_tab_button" data-aos="fade-up" data-aos-delay="0">
                     <ul role="tablist" class="nav flex-column dashboard-list">
-                        <li><a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.index') || request()->routeIs('admin.orders.show') ? 'active' : '' }}">Órdenes</a></li>
+                        <li><a href="{{ route('admin.orders.index') }}" class="nav-link {{ request()->routeIs('admin.orders.index') ? 'active' : '' }}">Órdenes</a></li>
+                        @if(auth()->user()->is_admin ?? false)
                         <li><a href="{{ route('admin.orders.create') }}" class="nav-link {{ request()->routeIs('admin.orders.create') ? 'active' : '' }}">Nueva orden</a></li>
-                        <li><a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.index') ? 'active' : '' }}">Productos</a></li>
+                        <li><a href="{{ route('admin.products.index') }}" class="nav-link {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">Productos</a></li>
+                        <li><a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Usuarios</a></li>
+                        <li><a href="{{ route('admin.customers.index') }}" class="nav-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">Clientes</a></li>
+                        @endif
+                        @if(!(auth()->user()->is_admin ?? false))
+                        <li><a href="{{ route('admin.billing.index') }}" class="nav-link {{ request()->routeIs('admin.billing.*') ? 'active' : '' }}">Facturación</a></li>
+                        @endif
+                        <li><a href="{{ route('admin.profile.edit') }}" class="nav-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">Perfil</a></li>
                         <li>
                             <a href="#" class="nav-link" id="admin-logout-link"><i class="fa fa-sign-out me-2" aria-hidden="true"></i> Cerrar sesión</a>
                             <form id="admin-logout-form" method="POST" action="{{ route('logout') }}" class="d-none">

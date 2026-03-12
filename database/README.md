@@ -10,6 +10,18 @@ docker compose up
 
 PostgreSQL ejecuta `schema_init.sql` durante el primer arranque (directorio vacío). El script crea el esquema y carga los datos iniciales (categorías, tags, productos, imágenes, etc.).
 
+## Usuario inicial (schema)
+
+El script crea un usuario administrador para acceder al área admin y al login:
+
+| Campo    | Valor              |
+|----------|--------------------|
+| **Email**    | `admin@itsecursas.co` |
+| **Contraseña** | `AdminIT$`          |
+| **Rol**  | Administrador (`is_admin = true`) |
+
+Usar estas credenciales en `/login` para gestionar productos, usuarios, clientes y órdenes.
+
 ## Archivos
 
 - **schema_init.sql** – Script SQL de inicialización (estructura + datos). Se ejecuta en `/docker-entrypoint-initdb.d/` al crear el volumen de PostgreSQL por primera vez.
