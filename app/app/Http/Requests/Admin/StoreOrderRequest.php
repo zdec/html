@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -20,5 +21,10 @@ class StoreOrderRequest extends FormRequest
             'items.*.product_id' => ['required', 'exists:products,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
         ];
+    }
+
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        throw new ValidationException($validator, redirect()->route('admin.orders.index')->withErrors($validator)->withInput());
     }
 }

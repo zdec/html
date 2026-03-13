@@ -30,7 +30,39 @@
     </div>
 </div>
 
+@php $canEdit = auth()->user()->is_admin && in_array($order->status, [\App\Models\Order::STATUS_DRAFT, \App\Models\Order::STATUS_PEDIDO], true); @endphp
+
 <div class="table_page table-responsive mb-4">
+    @if ($canEdit)
+    <form method="POST" action="{{ route('admin.orders.update', $order) }}">
+        @csrf
+        @method('PUT')
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unit.</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($order->items as $item)
+                    <tr>
+                        <td>{{ $item->product->name }}</td>
+                        <td>
+                            <input type="hidden" name="items[{{ $loop->index }}][id]" value="{{ $item->id }}">
+                            <input type="number" name="items[{{ $loop->index }}][qty]" class="form-control form-control-sm" style="width: 80px;" min="1" value="{{ old('items.'.$loop->index.'.qty', $item->qty) }}" required>
+                        </td>
+                        <td>${{ number_format($item->unit_price, 0, ',', ',') }}</td>
+                        <td>${{ number_format($item->subtotal, 0, ',', ',') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-dark btn-hover-primary">Guardar cantidades</button>
+    </form>
+    @else
     <table class="table">
         <thead>
             <tr>
@@ -51,9 +83,18 @@
             @endforeach
         </tbody>
     </table>
+    @endif
 </div>
 
-<div class="d-flex gap-2">
+@if ($errors->any())
+    <div class="alert alert-danger mb-3">
+        @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+        @endforeach
+    </div>
+@endif
+
+<div class="d-flex flex-wrap gap-2 align-items-center">
     @if(auth()->user()->is_admin && in_array($order->status, ['draft', 'pedido', 'remision']))
         @if (in_array($order->status, ['draft', 'pedido']))
             <form method="POST" action="{{ route('admin.orders.generate-remision', $order) }}" class="d-inline">
@@ -67,6 +108,13 @@
                 <button type="submit" class="btn btn-dark btn-hover-primary">Registrar venta</button>
             </form>
         @endif
+    @endif
+    @if ($canEdit)
+        <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="d-inline" onsubmit="return confirm('¿Eliminar esta orden? No se puede deshacer.');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger">Eliminar orden</button>
+        </form>
     @endif
     <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-dark">Volver a órdenes</a>
 </div>

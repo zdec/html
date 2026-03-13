@@ -37,10 +37,22 @@ class OrderPolicy
     }
 
     /**
-     * Gestionar flujo de orden (remisión, venta): solo admin.
+     * Gestionar flujo de orden (remisión, venta) o editar ítems: solo admin.
      */
     public function update(User $user, Order $order): bool
     {
         return $user->is_admin;
+    }
+
+    /**
+     * Eliminar orden: solo admin y solo si es borrador o pedido (sin movimiento).
+     */
+    public function delete(User $user, Order $order): bool
+    {
+        if (! $user->is_admin) {
+            return false;
+        }
+
+        return in_array($order->status, [Order::STATUS_DRAFT, Order::STATUS_PEDIDO], true);
     }
 }

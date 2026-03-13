@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
         Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create')->middleware('admin');
         Route::post('orders', [AdminOrderController::class, 'store'])->name('orders.store')->middleware('admin');
         Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::put('orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update')->middleware('admin');
+        Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy')->middleware('admin');
         Route::post('orders/{order}/remision', [AdminOrderController::class, 'generateRemision'])->name('orders.generate-remision')->middleware('admin');
         Route::post('orders/{order}/venta', [AdminOrderController::class, 'registerVenta'])->name('orders.register-venta')->middleware('admin');
 
