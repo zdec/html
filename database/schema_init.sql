@@ -433,6 +433,7 @@ CREATE TABLE public.orders (
     id bigint NOT NULL,
     customer_id bigint,
     email_guest character varying(255),
+    phone_guest character varying(50),
     status character varying(50) NOT NULL DEFAULT 'draft',
     document_number character varying(50),
     total numeric(12,2) DEFAULT 0,
@@ -926,7 +927,7 @@ COPY public.customers (id, user_id, email, name, phone, address, city, created_a
 -- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.orders (id, customer_id, email_guest, status, document_number, total, notes, source, created_at, updated_at) FROM stdin;
+COPY public.orders (id, customer_id, email_guest, phone_guest, status, document_number, total, notes, source, created_at, updated_at) FROM stdin;
 \.
 
 

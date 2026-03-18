@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreOrderRequest;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\OrderFlowService;
@@ -19,15 +20,17 @@ class AdminOrderController extends Controller
     {
         $this->authorize('create', Order::class);
 
-        $products = Product::with('category')->where('active', true)->orderBy('name')->get();
+        $customers = Customer::orderBy('name')->get();
+        $products = Product::with(['category', 'images'])->where('active', true)->orderBy('name')->get();
 
         $productOptions = $products->map(fn ($p) => [
             'id' => $p->id,
-            'name' => $p->name . ' - $' . number_format($p->price, 0, ',', ','),
+            'name' => $p->name,
             'price' => (float) $p->price,
+            'image' => $p->images->isNotEmpty() ? asset($p->images->first()->path) : '/assets/images/products/1/1.webp',
         ])->values()->all();
 
-        return view('admin.orders.create', compact('products', 'productOptions'));
+        return view('admin.orders.create', compact('customers', 'products', 'productOptions'));
     }
 
     public function store(StoreOrderRequest $request)
@@ -51,15 +54,26 @@ class AdminOrderController extends Controller
         }
 
         $order = Order::create([
-            'email_guest' => $validated['email_guest'] ?? null,
+            'customer_id' => null,
+            'email_guest' => $validated['customer_email'],
+            'phone_guest' => $validated['customer_phone'] ?? null,
             'status' => Order::STATUS_PEDIDO,
             'total' => $total,
             'notes' => $validated['notes'] ?? null,
             'source' => 'admin',
+            'created_at' => \Carbon\Carbon::parse($validated['order_date'])->startOfDay(),
         ]);
 
         foreach ($orderItems as $item) {
             $order->items()->create($item);
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.orders.show', $order),
+                'message' => 'Orden creada correctamente.',
+            ]);
         }
 
         return redirect()->route('admin.orders.show', $order)->with('success', 'Orden creada correctamente.');
@@ -75,8 +89,9 @@ class AdminOrderController extends Controller
                 $orders = $query->whereRaw('1 = 0')->paginate(20);
                 $products = collect();
                 $productOptions = [];
+                $customers = collect();
 
-                return view('admin.orders.index', compact('orders', 'products', 'productOptions'));
+                return view('admin.orders.index', compact('orders', 'products', 'productOptions', 'customers'));
             }
             $query->where('customer_id', $customer->id);
         }
@@ -91,18 +106,27 @@ class AdminOrderController extends Controller
 
         $orders = $query->paginate(20);
 
+        $orders->getCollection()->each(function (Order $order) {
+            $order->customer_email_display = $order->customer
+                ? strtolower($order->customer->email)
+                : ($order->email_guest ? strtolower($order->email_guest) : '—');
+        });
+
         $products = collect();
         $productOptions = [];
+        $customers = collect();
         if ($request->user()->is_admin) {
-            $products = Product::with('category')->where('active', true)->orderBy('name')->get();
+            $customers = Customer::orderBy('name')->get();
+            $products = Product::with(['category', 'images'])->where('active', true)->orderBy('name')->get();
             $productOptions = $products->map(fn ($p) => [
                 'id' => $p->id,
-                'name' => $p->name . ' - $' . number_format($p->price, 0, ',', ','),
+                'name' => $p->name,
                 'price' => (float) $p->price,
+                'image' => $p->images->isNotEmpty() ? asset($p->images->first()->path) : '/assets/images/products/1/1.webp',
             ])->values()->all();
         }
 
-        return view('admin.orders.index', compact('orders', 'products', 'productOptions'));
+        return view('admin.orders.index', compact('orders', 'products', 'productOptions', 'customers'));
     }
 
     public function show(Order $order)
@@ -114,28 +138,44 @@ class AdminOrderController extends Controller
         return view('admin.orders.show', compact('order'));
     }
 
-    public function generateRemision(Order $order)
+    public function generateRemision(Request $request, Order $order)
     {
         $this->authorize('update', $order);
 
         if (! in_array($order->status, [Order::STATUS_PEDIDO, Order::STATUS_DRAFT])) {
-            return back()->with('error', 'Solo se puede generar remisión desde pedido o borrador.');
+            $msg = 'Solo se puede generar remisión desde pedido o borrador.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
         $this->orderFlowService->generateRemision($order);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.show', $order), 'message' => 'Remisión generada correctamente.']);
+        }
+
         return back()->with('success', 'Remisión generada correctamente.');
     }
 
-    public function registerVenta(Order $order)
+    public function registerVenta(Request $request, Order $order)
     {
         $this->authorize('update', $order);
 
         if (! in_array($order->status, [Order::STATUS_PEDIDO, Order::STATUS_DRAFT, Order::STATUS_REMISION])) {
-            return back()->with('error', 'No se puede registrar venta desde este estado.');
+            $msg = 'No se puede registrar venta desde este estado.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
         $this->orderFlowService->registerVenta($order);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.show', $order), 'message' => 'Venta registrada correctamente.']);
+        }
 
         return back()->with('success', 'Venta registrada correctamente.');
     }
@@ -143,11 +183,15 @@ class AdminOrderController extends Controller
     /**
      * Eliminar orden (solo borrador o pedido, sin movimiento).
      */
-    public function destroy(Order $order)
+    public function destroy(Request $request, Order $order)
     {
         $this->authorize('delete', $order);
 
         $order->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.index'), 'message' => 'Orden eliminada.']);
+        }
 
         return redirect()->route('admin.orders.index')->with('success', 'Orden eliminada.');
     }
@@ -162,22 +206,25 @@ class AdminOrderController extends Controller
         $order->load('items');
 
         if (! in_array($order->status, [Order::STATUS_DRAFT, Order::STATUS_PEDIDO], true)) {
-            return back()->with('error', 'Solo se pueden editar cantidades en pedidos o borradores.');
+            $msg = 'Solo se pueden editar cantidades en pedidos o borradores.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
         }
 
         $validated = $request->validate([
-            'items' => ['required', 'array', 'min:1'],
+            'notes' => ['nullable', 'string'],
+            'items' => ['required', 'array'],
             'items.*.id' => ['required', 'integer', 'exists:order_items,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
         ]);
 
-        $orderItemIds = $order->items->pluck('id')->all();
-        $total = 0;
+        $submittedIds = array_map(fn ($row) => (int) $row['id'], $validated['items']);
+        $order->items()->whereNotIn('id', $submittedIds)->delete();
 
+        $total = 0;
         foreach ($validated['items'] as $row) {
-            if (! in_array((int) $row['id'], $orderItemIds, true)) {
-                continue;
-            }
             $item = $order->items->firstWhere('id', (int) $row['id']);
             if (! $item) {
                 continue;
@@ -188,7 +235,14 @@ class AdminOrderController extends Controller
             $total += $subtotal;
         }
 
-        $order->update(['total' => $total]);
+        $order->update([
+            'total' => $total,
+            'notes' => $validated['notes'] ?? $order->notes,
+        ]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.show', $order), 'message' => 'Cantidades actualizadas.']);
+        }
 
         return back()->with('success', 'Cantidades actualizadas.');
     }

@@ -15,16 +15,11 @@
 @endphp
 @push('styles')
 <style>
-.admin-orders-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 1.5rem; }
-.admin-orders-header h4 { margin: 0; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.02em; }
-.admin-orders-header .header-right { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.admin-orders-header .filter-select {
-    min-width: 140px; height: 44px; padding: 0.35rem 0.75rem;
-    font-size: 0.95rem; border: 1px solid #212529; border-radius: 4px;
-    background-color: #fff; color: #212529;
-    appearance: auto;
-}
-.admin-orders-header .filter-select:focus { outline: none; border-color: #266bf9; }
+.table_page.table-responsive .table tbody td { font-weight: normal; text-transform: none; }
+.order-actions-delete { text-decoration: none !important; }
+.order-actions-delete:hover { text-decoration: none !important; color: #fff !important; }
+.order-product-search-wrap.search-element { max-width: none; width: 100%; margin: 0; }
+.order-product-search-wrap .search-results { width: 100%; left: 0; right: 0; }
 </style>
 @endpush
 
@@ -52,26 +47,26 @@
             <tr>
                 <th>#</th>
                 <th>Fecha</th>
-                <th>Cliente / Email</th>
+                <th>Cliente / email</th>
                 <th>Total</th>
                 <th>Estado</th>
-                <th>Actions</th>
+                <th class="text-end"></th>
             </tr>
         </thead>
         <tbody>
             @forelse ($orders as $order)
                 <tr>
-                    <td>{{ $order->id }}</td>
-                    <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
-                    <td>
+                    <td class="fw-normal">{{ $order->id }}</td>
+                    <td class="fw-normal">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                    <td class="fw-normal">
                         @if ($order->customer)
-                            {{ $order->customer->name }} ({{ $order->customer->email }})
+                            {{ $order->customer->name }} ({{ $order->customer_email_display }})
                         @else
-                            {{ $order->email_guest ?? '—' }}
+                            {{ $order->customer_email_display }}
                         @endif
                     </td>
-                    <td>${{ number_format($order->total, 0, ',', ',') }}</td>
-                    <td>
+                    <td class="fw-normal">${{ number_format($order->total, 0, ',', ',') }}</td>
+                    <td class="fw-normal">
                         @if ($order->status === 'venta')<span class="success">Venta</span>
                         @elseif ($order->status === 'remision')<span class="success">Remisión</span>
                         @elseif ($order->status === 'pedido')<span>Pedido</span>
@@ -79,15 +74,17 @@
                         @else<span>Borrador</span>
                         @endif
                     </td>
-                    <td>
-                        <a href="{{ route('admin.orders.show', $order) }}" class="view">Ver</a>
-                        @if(auth()->user()->is_admin && in_array($order->status, ['draft', 'pedido']))
-                            <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="d-inline ms-1" onsubmit="return confirm('¿Eliminar esta orden?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-link btn-sm text-danger p-0 border-0">Eliminar</button>
-                            </form>
-                        @endif
+                    <td class="fw-normal">
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <a href="{{ route('admin.orders.show', $order) }}" class="view">Ver</a>
+                            @if(auth()->user()->is_admin && in_array($order->status, ['draft', 'pedido']))
+                                <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="d-inline" data-confirm="¿Eliminar esta orden? No se puede deshacer." data-ajax-delete="1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm order-actions-delete">Eliminar</button>
+                                </form>
+                            @endif
+                        </span>
                     </td>
                 </tr>
             @empty
@@ -103,8 +100,8 @@
 
 @if(auth()->user()->is_admin && $products->isNotEmpty())
 {{-- Modal Nueva orden --}}
-<div class="modal fade" id="modalCreateOrder" tabindex="-1" aria-labelledby="modalCreateOrderLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+<div class="modal fade" id="modalCreateOrder" tabindex="-1" aria-labelledby="modalCreateOrderLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalCreateOrderLabel">Nueva orden</h5>
@@ -117,34 +114,86 @@
     </div>
 </div>
 @endif
-@endsection
 
-@push('scripts')
+@if(auth()->user()->is_admin && $products->isNotEmpty())
 <script>
 (function() {
-    var filterSelect = document.getElementById('filter-status');
-    if (filterSelect) {
-        filterSelect.addEventListener('change', function() {
-            var value = this.value;
-            var url = new URL(window.location.href);
-            var params = new URLSearchParams(url.search);
-            for (var k of Array.from(params.keys())) {
-                if (k === 'status' || k.indexOf('status') === 0) params.delete(k);
-            }
-            if (value) params.set('status', value);
-            url.search = params.toString();
-            if (window.adminLoadPage) window.adminLoadPage(url.toString());
-            else window.location.href = url.toString();
-        });
-    }
-
-    @if(auth()->user()->is_admin && $products->isNotEmpty())
     var productOptions = @json($productOptions);
     var form = document.getElementById('form-create-order');
     if (form) {
         var tbody = form.querySelector('#items-container');
-        var addBtn = form.querySelector('#add-item');
+        var searchInput = form.querySelector('#order-product-search');
+        var resultsEl = form.querySelector('#order-search-results');
         var index = tbody ? tbody.querySelectorAll('.item-row').length : 0;
+
+        var cancelLink = form.querySelector('.order-form-cancel');
+        var modalEl = document.getElementById('modalCreateOrder');
+        if (cancelLink && modalEl) {
+            cancelLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.hide();
+            });
+        }
+
+        if (form && modalEl && modalEl.contains(form)) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var errorsEl = document.getElementById('form-create-order-errors');
+                var listEl = errorsEl ? errorsEl.querySelector('.form-create-order-errors-list') : null;
+                var submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) { submitBtn.disabled = true; }
+                var formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(function(response) {
+                    if (response.status === 422) {
+                        if (submitBtn) { submitBtn.disabled = false; }
+                        return response.json().then(function(data) {
+                            var messages = [];
+                            if (data.errors) {
+                                for (var key in data.errors) {
+                                    if (data.errors[key] && data.errors[key].length) {
+                                        messages = messages.concat(data.errors[key]);
+                                    }
+                                }
+                            }
+                            if (errorsEl && listEl) {
+                                listEl.innerHTML = messages.map(function(msg) {
+                                    return '<li>' + (msg.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')) + '</li>';
+                                }).join('');
+                                errorsEl.style.display = 'block';
+                                errorsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
+                        });
+                    }
+                    if (response.ok) {
+                        return response.json().then(function(data) {
+                            if (data.success && data.redirect) {
+                                if (window.adminLoadPage) {
+                                    window.adminLoadPage(data.redirect);
+                                    if (data.message && typeof showAdminFlash === 'function') showAdminFlash(data.message, 'success');
+                                } else {
+                                    window.location.href = data.redirect;
+                                }
+                                var m = bootstrap.Modal.getInstance(modalEl);
+                                if (m) m.hide();
+                            } else if (submitBtn) {
+                                submitBtn.disabled = false;
+                            }
+                        });
+                    }
+                    if (submitBtn) { submitBtn.disabled = false; }
+                }).catch(function() {
+                    if (submitBtn) { submitBtn.disabled = false; }
+                });
+            });
+        }
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -152,40 +201,161 @@
             div.textContent = str;
             return div.innerHTML;
         }
-        function buildOption(p) {
-            return '<option value="' + p.id + '" data-price="' + String(p.price) + '">' + escapeHtml(p.name) + '</option>';
+        function formatPrice(n) {
+            return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
-        if (addBtn && tbody) {
-            addBtn.addEventListener('click', function() {
-                var opts = '<option value="">Seleccionar producto</option>';
-                productOptions.forEach(function(p) { opts += buildOption(p); });
+        if (searchInput && resultsEl && tbody) {
+            searchInput.addEventListener('input', function() {
+                var q = (this.value || '').trim().toLowerCase();
+                if (q.length < 2) {
+                    resultsEl.style.display = 'none';
+                    resultsEl.innerHTML = '';
+                    return;
+                }
+                var selectedIds = [];
+                tbody.querySelectorAll('.item-row[data-product-id]').forEach(function(tr) {
+                    var id = tr.getAttribute('data-product-id');
+                    if (id) selectedIds.push(String(id));
+                });
+                var list = productOptions.filter(function(p) {
+                    if (selectedIds.indexOf(String(p.id)) !== -1) return false;
+                    return (p.name || '').toLowerCase().indexOf(q) !== -1;
+                }).slice(0, 10);
+                if (list.length === 0) {
+                    resultsEl.innerHTML = '<div class="search-result-item search-result-empty">Sin resultados</div>';
+                } else {
+                    resultsEl.innerHTML = list.map(function(p) {
+                        var imgSrc = escapeHtml(p.image || '');
+                        return '<div class="search-result-item" data-id="' + escapeHtml(String(p.id)) + '" data-name="' + escapeHtml(p.name) + '" data-price="' + escapeHtml(String(p.price)) + '" data-image="' + imgSrc + '">' +
+                            '<div class="search-result-image"><img src="' + imgSrc + '" alt=""></div>' +
+                            '<div class="search-result-content">' +
+                            '<div class="search-result-title">' + escapeHtml(p.name) + '</div>' +
+                            '<div class="search-result-price-container"><span class="search-result-price">$' + formatPrice(p.price) + '</span></div>' +
+                            '</div></div>';
+                    }).join('');
+                }
+                resultsEl.style.display = 'block';
+            });
+            searchInput.addEventListener('focus', function() {
+                if (resultsEl.innerHTML) resultsEl.style.display = 'block';
+            });
+            document.addEventListener('click', function(e) {
+                if (!form.contains(e.target) || resultsEl.contains(e.target) || e.target === searchInput) return;
+                resultsEl.style.display = 'none';
+            });
+            resultsEl.addEventListener('click', function(e) {
+                var item = e.target.closest('.search-result-item');
+                if (!item) return;
+                var id = item.getAttribute('data-id');
+                var name = item.getAttribute('data-name');
+                var price = item.getAttribute('data-price');
+                var image = item.getAttribute('data-image') || '';
                 var tr = document.createElement('tr');
                 tr.className = 'item-row';
+                tr.setAttribute('data-product-id', id);
+                tr.setAttribute('data-unit-price', price);
                 tr.innerHTML =
-                    '<td><select name="items[' + index + '][product_id]" class="form-select form-select-sm" required>' + opts + '</select></td>' +
-                    '<td><input type="number" name="items[' + index + '][qty]" class="form-control form-control-sm" min="1" value="1" required></td>' +
-                    '<td><button type="button" class="btn btn-outline-danger btn-sm remove-item">Quitar</button></td>';
+                    '<td class="item-num text-center"></td>' +
+                    '<td><img src="' + escapeHtml(image) + '" alt="" class="img-fluid d-inline-block me-2" style="max-width: 50px; height: auto; vertical-align: middle;"><span class="d-inline-block align-middle">' + escapeHtml(name) + ' - $' + formatPrice(price) + '</span><input type="hidden" name="items[' + index + '][product_id]" value="' + escapeHtml(id) + '"></td>' +
+                    '<td class="text-center"><input type="number" name="items[' + index + '][qty]" class="form-control form-control-sm item-qty mx-auto" style="width: 70px; text-align: center;" min="1" value="1" required></td>' +
+                    '<td class="text-center item-total">$' + formatPrice(price) + '</td>' +
+                    '<td><button type="button" class="btn btn-danger btn-sm remove-item">Quitar</button></td>';
                 tbody.appendChild(tr);
                 index++;
-            });
-
-            tbody.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-item') && tbody.querySelectorAll('.item-row').length > 1) {
-                    e.target.closest('tr').remove();
-                }
+                updateItemNumbers();
+                updateOrderTotal();
+                searchInput.value = '';
+                resultsEl.innerHTML = '';
+                resultsEl.style.display = 'none';
+                searchInput.focus();
             });
         }
-    }
-    @endif
 
-    @if($errors->any())
-    var modal = document.getElementById('modalCreateOrder');
-    if (modal) {
-        var m = new bootstrap.Modal(modal);
-        m.show();
+        function updateItemNumbers() {
+            var rows = tbody.querySelectorAll('.item-row');
+            rows.forEach(function(r, i) { var cell = r.querySelector('.item-num'); if (cell) cell.textContent = i + 1; });
+        }
+        function updateOrderTotal() {
+            var grandEl = form.querySelector('#order-grand-total');
+            if (!grandEl) return;
+            var sum = 0;
+            tbody.querySelectorAll('.item-total').forEach(function(td) {
+                var t = (td.textContent || '').replace(/[$\s]/g, '').replace(/,/g, '');
+                sum += parseFloat(t) || 0;
+            });
+            grandEl.textContent = '$' + formatPrice(Math.round(sum));
+        }
+        function updateRowTotal(tr) {
+            var price = parseFloat(tr.getAttribute('data-unit-price')) || 0;
+            var qtyInput = tr.querySelector('.item-qty');
+            var totalEl = tr.querySelector('.item-total');
+            if (!qtyInput || !totalEl) return;
+            var qty = parseInt(qtyInput.value, 10) || 0;
+            if (qty <= 0) {
+                tr.remove();
+                updateItemNumbers();
+                updateOrderTotal();
+                return;
+            }
+            if (qty < 1) qtyInput.value = 1;
+            totalEl.textContent = '$' + formatPrice(price * (parseInt(qtyInput.value, 10) || 1));
+            updateOrderTotal();
+        }
+
+        if (tbody) {
+            tbody.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    e.target.closest('tr').remove();
+                    updateItemNumbers();
+                }
+            });
+            tbody.addEventListener('change', function(e) {
+                if (e.target.classList.contains('item-qty')) {
+                    var tr = e.target.closest('tr');
+                    if (tr) updateRowTotal(tr);
+                }
+            });
+            tbody.addEventListener('input', function(e) {
+                if (e.target.classList.contains('item-qty')) {
+                    var tr = e.target.closest('tr');
+                    if (tr) {
+                        var qty = parseInt(e.target.value, 10);
+                        if (qty === 0 || isNaN(qty) || qty < 0) {
+                            tr.remove();
+                            updateItemNumbers();
+                            updateOrderTotal();
+                        } else {
+                            var price = parseFloat(tr.getAttribute('data-unit-price')) || 0;
+                            var totalEl = tr.querySelector('.item-total');
+                            if (totalEl) totalEl.textContent = '$' + formatPrice(price * qty);
+                            updateOrderTotal();
+                        }
+                    }
+                }
+            });
+            tbody.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    e.target.closest('tr').remove();
+                    updateItemNumbers();
+                    updateOrderTotal();
+                }
+            });
+            updateItemNumbers();
+            updateOrderTotal();
+        }
     }
+    @if($errors->any())
+    (function openModalOnErrors() {
+        var modal = document.getElementById('modalCreateOrder');
+        if (!modal) return;
+        setTimeout(function() {
+            var m = bootstrap.Modal.getOrCreateInstance(modal);
+            m.show();
+        }, 50);
+    })();
     @endif
 })();
 </script>
-@endpush
+@endif
+@endsection
