@@ -49,6 +49,7 @@ Route::middleware('auth')->group(function () {
         // Solo administradores
         Route::middleware('admin')->group(function () {
             Route::get('productos/{product}/modal', [AdminProductController::class, 'modal'])->name('products.modal');
+            Route::get('productos/{product}/edit-form', [AdminProductController::class, 'editForm'])->name('products.edit-form');
             Route::resource('productos', AdminProductController::class)->names('products')->parameters(['producto' => 'product']);
             Route::post('productos/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.update-stock');
             Route::resource('users', AdminUserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);

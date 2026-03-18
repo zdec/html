@@ -38,6 +38,13 @@ class AdminUserController extends Controller
             'is_admin' => $request->boolean('is_admin'),
         ]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.users.index'),
+                'message' => 'Usuario creado correctamente.',
+            ]);
+        }
         return redirect()->route('admin.users.index')->with('success', 'Usuario creado correctamente.');
     }
 
@@ -64,15 +71,29 @@ class AdminUserController extends Controller
 
         $user->save();
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.users.index'),
+                'message' => 'Usuario actualizado correctamente.',
+            ]);
+        }
         return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
         $this->authorize('delete', $user);
 
         $user->delete();
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.users.index'),
+                'message' => 'Usuario eliminado correctamente.',
+            ]);
+        }
         return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado correctamente.');
     }
 }

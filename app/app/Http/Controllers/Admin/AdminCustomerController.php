@@ -29,6 +29,13 @@ class AdminCustomerController extends Controller
     {
         $customer->update($request->validated());
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.customers.index'),
+                'message' => 'Cliente actualizado correctamente.',
+            ]);
+        }
         return redirect()->route('admin.customers.index')->with('success', 'Cliente actualizado correctamente.');
     }
 }

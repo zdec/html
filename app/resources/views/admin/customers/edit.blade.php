@@ -12,7 +12,7 @@
 @section('admin_content')
 <h4>Editar cliente</h4>
 
-<form method="POST" action="{{ route('admin.customers.update', $customer) }}">
+<form method="POST" action="{{ route('admin.customers.update', $customer) }}" class="js-ajax-form">
     @csrf
     @method('PUT')
     <div class="row">

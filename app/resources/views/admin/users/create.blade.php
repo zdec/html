@@ -12,7 +12,7 @@
 @section('admin_content')
 <h4>Nuevo usuario</h4>
 
-<form method="POST" action="{{ route('admin.users.store') }}">
+<form method="POST" action="{{ route('admin.users.store') }}" class="js-ajax-form">
     @csrf
     <div class="row">
         <div class="col-md-6 mb-3">

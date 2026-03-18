@@ -17,9 +17,11 @@ class AdminProductController extends Controller
     {
         $this->authorize('viewAny', Product::class);
 
-        $products = Product::with(['category', 'images'])->orderBy('name')->paginate(20);
+        $products = Product::with(['category', 'images'])->orderBy('name')->paginate(10);
+        $products->setPath(route('admin.products.index'));
+        $categories = Category::orderBy('name')->get();
 
-        return view('admin.products.index', compact('products'));
+        return view('admin.products.index', compact('products', 'categories'));
     }
 
     public function create()
@@ -49,6 +51,14 @@ class AdminProductController extends Controller
 
         $this->storeProductImages($product, $request->file('image_main'), $request->file('image_gallery'));
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.products.index'),
+                'message' => 'Producto creado correctamente.',
+            ]);
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
     }
 
@@ -68,6 +78,16 @@ class AdminProductController extends Controller
         return view('admin.products.partials.modal-content', compact('product'));
     }
 
+    public function editForm(Product $product)
+    {
+        $this->authorize('update', $product);
+
+        $product->load('images');
+        $categories = Category::orderBy('name')->get();
+
+        return view('admin.products.partials.form-edit', compact('product', 'categories'));
+    }
+
     public function edit(Product $product)
     {
         $this->authorize('update', $product);
@@ -84,8 +104,9 @@ class AdminProductController extends Controller
 
         $remainingAfterRemove = $product->images()->count() - count($validated['remove_image_ids'] ?? []);
         $newUploads = ($request->hasFile('image_main') ? 1 : 0) + count($request->file('image_gallery') ?? []);
-        if ($remainingAfterRemove + $newUploads < 1) {
-            return back()->withErrors(['image_main' => 'El producto debe tener al menos una imagen.'])->withInput();
+        $totalAfterUpdate = $remainingAfterRemove + $newUploads;
+        if ($totalAfterUpdate < 5) {
+            return back()->withErrors(['image_main' => 'El producto debe tener al menos 5 imágenes en total (1 principal + 4 de galería). Actualmente quedarían ' . $totalAfterUpdate . '.'])->withInput();
         }
 
         $product->update([
@@ -116,18 +137,50 @@ class AdminProductController extends Controller
             $this->storeProductImages($product, $mainFile, $galleryFiles, $product->images()->count());
         }
 
+        if ($product->images()->count() < 5) {
+            $msg = 'El producto debe tener al menos 5 imágenes (1 principal + 4 de galería).';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->withErrors(['image_main' => $msg])->withInput();
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.products.index'),
+                'message' => 'Producto actualizado correctamente.',
+            ]);
+        }
+
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }
 
-    public function destroy(Product $product)
+    public function destroy(Request $request, Product $product)
     {
         $this->authorize('delete', $product);
+
+        if ((int) $product->stock !== 0) {
+            $msg = 'Solo se puede eliminar un producto cuando su stock es 0.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('admin.products.index')->with('error', $msg);
+        }
 
         foreach ($product->images as $img) {
             $this->deleteProductImageFile($img->path);
         }
         Storage::disk('public')->deleteDirectory('products/' . $product->id);
         $product->delete();
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.products.index'),
+                'message' => 'Producto eliminado correctamente.',
+            ]);
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Producto eliminado correctamente.');
     }
@@ -142,6 +195,14 @@ class AdminProductController extends Controller
 
         $product->update(['stock' => $request->stock]);
 
+        if ($request->expectsJson() || $request->ajax()) {
+            $redirect = $request->header('Referer') ?? route('admin.products.index');
+            return response()->json([
+                'success' => true,
+                'redirect' => $redirect,
+                'message' => 'Stock actualizado correctamente.',
+            ]);
+        }
         return back()->with('success', 'Stock actualizado correctamente.');
     }
 

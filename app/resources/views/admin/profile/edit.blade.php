@@ -10,7 +10,7 @@
 @section('admin_content')
 <h4>Mi perfil</h4>
 
-<form method="POST" action="{{ route('admin.profile.update') }}">
+<form method="POST" action="{{ route('admin.profile.update') }}" class="js-ajax-form">
     @csrf
     @method('PUT')
     <div class="row">

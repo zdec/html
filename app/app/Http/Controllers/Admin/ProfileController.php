@@ -37,6 +37,13 @@ class ProfileController extends Controller
             $user->customer->update($request->only('phone', 'address', 'city'));
         }
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('admin.profile.edit'),
+                'message' => 'Perfil actualizado correctamente.',
+            ]);
+        }
         return redirect()->route('admin.profile.edit')->with('success', 'Perfil actualizado correctamente.');
     }
 }

@@ -31,10 +31,16 @@
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->is_admin ? 'Administrador' : 'Usuario' }}</td>
                     <td>
-                        <a href="{{ route('admin.users.edit', $user) }}" class="view me-2">Editar</a>
-                        @if($user->id !== auth()->id())
-                        <button type="button" class="btn btn-link btn-sm text-danger p-0 border-0" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-user-id="{{ $user->id }}" data-user-name="{{ e($user->name) }}">Eliminar</button>
-                        @endif
+                        <span class="d-inline-flex align-items-center gap-2">
+                            <a href="{{ route('admin.users.edit', $user) }}" class="view">Editar</a>
+                            @if($user->id !== auth()->id())
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" class="d-inline" data-confirm="¿Eliminar al usuario {{ e($user->name) }}? No se puede deshacer." data-ajax-delete="1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm order-actions-delete">Eliminar</button>
+                                </form>
+                            @endif
+                        </span>
                     </td>
                 </tr>
             @endforeach
@@ -43,45 +49,4 @@
 </div>
 
 {{ $users->links() }}
-
-{{-- Modal confirmar eliminar --}}
-<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteUserModalLabel">Eliminar usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Está seguro de que desea eliminar al usuario <strong id="deleteUserName"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
-                <form id="deleteUserForm" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var modal = document.getElementById('deleteUserModal');
-    if (modal) {
-        modal.addEventListener('show.bs.modal', function(e) {
-            var btn = e.relatedTarget;
-            var id = btn.getAttribute('data-user-id');
-            var name = btn.getAttribute('data-user-name');
-            modal.querySelector('#deleteUserName').textContent = name;
-            var form = document.getElementById('deleteUserForm');
-            form.action = '{{ url("admin/users") }}/' + id;
-        });
-    }
-});
-</script>
-@endpush
 @endsection

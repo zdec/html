@@ -23,8 +23,16 @@ class StoreProductRequest extends FormRequest
             'stock' => ['required', 'integer', 'min:0'],
             'active' => ['boolean'],
             'image_main' => ['required', 'image', 'max:5120'],
-            'image_gallery' => ['nullable', 'array'],
-            'image_gallery.*' => ['image', 'max:5120'],
+            'image_gallery' => ['required', 'array', 'min:4'],
+            'image_gallery.*' => ['required', 'image', 'max:5120'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'image_gallery.required' => 'Debe subir al menos 4 imágenes para la galería.',
+            'image_gallery.min' => 'La galería debe tener al menos 4 imágenes.',
         ];
     }
 }

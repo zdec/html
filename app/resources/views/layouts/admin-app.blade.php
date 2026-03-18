@@ -60,16 +60,40 @@
     border-color: #bb2d3b !important;
     color: #fff !important;
 }
-/* Inputs numéricos: valor visible (spinners no tapan el número) */
-.account-dashboard input[type="number"] {
-    min-width: 3.5rem;
-    text-align: right;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+
+/* Inputs type=number: anular padding 80px del tema. width sin !important para que style="width: Xpx" del HTML gane */
+.account-dashboard input[type="number"].form-control {
+    width: 80px;
+    min-height: 31px !important;
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    -webkit-appearance: textfield !important;
+    appearance: textfield !important;
 }
-.account-dashboard input[type="number"]::-webkit-outer-spin-button,
-.account-dashboard input[type="number"]::-webkit-inner-spin-button {
-    opacity: 1;
+.account-dashboard input[type="number"].form-control::-webkit-outer-spin-button,
+.account-dashboard input[type="number"].form-control::-webkit-inner-spin-button {
+    opacity: 1 !important;
+    -webkit-appearance: inner-spin-button !important;
+}
+
+/* Precios (text): anular padding grande del tema para que no oculte dígitos */
+.account-dashboard .form-control.input-currency {
+    padding: 0.25rem 0.5rem !important;
+    min-width: 10em;
+}
+/* Precios cuando eran number: sin flechas */
+.account-dashboard input[type="number"].form-control.input-currency {
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem !important;
+}
+.account-dashboard input[type="number"].form-control.input-currency::-webkit-outer-spin-button,
+.account-dashboard input[type="number"].form-control.input-currency::-webkit-inner-spin-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+.account-dashboard input[type="number"].form-control.input-currency {
+    -moz-appearance: textfield !important;
 }
 
 /* Modal de confirmación: ancho, X dentro, botones en una línea */
@@ -540,9 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: new FormData(form),
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 }).then(function(r) {
-                    if (!r.ok) return;
                     return r.json().then(function(data) {
-                        if (data.success && data.redirect) {
+                        if (r.ok && data.success && data.redirect) {
                             if (row && row.parentNode) {
                                 row.remove();
                                 if (typeof showAdminFlash === 'function') showAdminFlash(data.message || 'Orden eliminada.', 'success');
@@ -552,6 +575,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             } else {
                                 window.location.href = data.redirect;
                             }
+                        } else if (!r.ok && data.message && typeof showAdminFlash === 'function') {
+                            showAdminFlash(data.message, 'error');
                         }
                     });
                 }).catch(function() {});
@@ -562,6 +587,62 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+(function() {
+    function parseCurrency(val) {
+        if (val === '' || val == null) return '';
+        var s = String(val).replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        var n = parseFloat(s);
+        return isNaN(n) ? '' : n;
+    }
+    function formatCurrency(num) {
+        if (num === '' || num == null || isNaN(num)) return '';
+        var n = Number(num);
+        var parts = n.toFixed(2).split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        var out = parts.join(',');
+        if (parts[1] === '00') out = parts[0];
+        return out;
+    }
+    function initCurrencyInputs(container) {
+        if (!container) return;
+        container.querySelectorAll('.input-currency[data-currency]').forEach(function(inp) {
+            var val = inp.value;
+            if (val !== '' && !isNaN(parseCurrency(val))) inp.value = formatCurrency(parseCurrency(val));
+            inp.removeEventListener('blur', inp._currencyBlur);
+            inp.removeEventListener('input', inp._currencyInput);
+            inp._currencyBlur = function() {
+                var n = parseCurrency(this.value);
+                this.value = n === '' ? '' : formatCurrency(n);
+            };
+            inp._currencyInput = function() {
+                var n = parseCurrency(this.value);
+                var start = this.selectionStart;
+                this.value = n === '' ? '' : formatCurrency(n);
+                this.setSelectionRange(this.value.length, this.value.length);
+            };
+            inp.addEventListener('blur', inp._currencyBlur);
+            inp.addEventListener('input', inp._currencyInput);
+        });
+    }
+    function unformatCurrencyForSubmit(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-currency[data-currency]').forEach(function(inp) {
+            var n = parseCurrency(inp.value);
+            inp.value = n === '' ? '' : String(n);
+        });
+    }
+    window.initCurrencyInputs = initCurrencyInputs;
+    window.unformatCurrencyForSubmit = unformatCurrencyForSubmit;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initCurrencyInputs(document);
+        document.addEventListener('submit', function(e) {
+            var form = e.target;
+            if (form && form.querySelectorAll('.input-currency[data-currency]').length) unformatCurrencyForSubmit(form);
+        }, true);
+    });
+})();
 </script>
 @endpush
 @endsection
