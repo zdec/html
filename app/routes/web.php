@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
             Route::post('productos/{product}/stock', [AdminProductController::class, 'updateStock'])->name('products.update-stock');
             Route::get('users/{user}/edit-form', [AdminUserController::class, 'editForm'])->name('users.edit-form');
             Route::resource('users', AdminUserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+            Route::get('customers/{customer}/edit-form', [AdminCustomerController::class, 'editForm'])->name('customers.edit-form');
+            Route::get('customers/{customer}/orders', [AdminCustomerController::class, 'ordersModal'])->name('customers.orders-modal');
             Route::resource('customers', AdminCustomerController::class)->only(['index', 'edit', 'update']);
         });
     });

@@ -53,7 +53,7 @@
                     <td class="fw-normal">
                         <span class="d-inline-flex align-items-center gap-2">
                             <a href="#" class="view view-product-modal text-decoration-none" data-product-modal-url="{{ route('admin.products.modal', $product) }}">Ver</a>
-                            <button type="button" class="btn btn-dark btn-hover-primary btn-sm product-edit-trigger" data-bs-toggle="modal" data-bs-target="#modalEditProduct" data-edit-form-url="{{ route('admin.products.edit-form', $product) }}">Editar</button>
+                            <button type="button" class="btn btn-dark btn-hover-primary btn-sm product-edit-trigger" data-edit-form-url="{{ route('admin.products.edit-form', $product) }}">Editar</button>
                             <form method="POST" action="{{ route('admin.products.destroy', ['producto' => $product]) }}" class="d-inline" data-confirm="¿Eliminar este producto? No se puede deshacer." data-ajax-delete="1">
                                 @csrf
                                 @method('DELETE')
@@ -186,72 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             }).catch(function() { if (btn) btn.disabled = false; });
-        });
-    }
-
-    var modalEditProduct = document.getElementById('modalEditProduct');
-    var modalEditProductBody = document.getElementById('modalEditProductBody');
-    if (modalEditProduct && modalEditProductBody) {
-        modalEditProduct.addEventListener('show.bs.modal', function(e) {
-            var btn = e.relatedTarget;
-            var url = btn && btn.getAttribute('data-edit-form-url');
-            if (!url) return;
-            modalEditProductBody.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
-                .then(function(r) { return r.text(); })
-                .then(function(html) {
-                    modalEditProductBody.innerHTML = html;
-                    initCurrencyInputs(modalEditProductBody);
-                    var form = modalEditProductBody.querySelector('#form-edit-product');
-                    var cancelLink = modalEditProductBody.querySelector('.product-edit-form-cancel');
-                    if (cancelLink) {
-                        cancelLink.addEventListener('click', function(ev) {
-                            ev.preventDefault();
-                            var m = bootstrap.Modal.getInstance(modalEditProduct);
-                            if (m) m.hide();
-                        });
-                    }
-                    if (form) {
-                        form.addEventListener('submit', function(ev) {
-                            ev.preventDefault();
-                            unformatCurrencyForSubmit(form);
-                            var submitBtn = form.querySelector('button[type="submit"]');
-                            var errorsEl = modalEditProductBody.querySelector('#form-edit-product-errors');
-                            var listEl = errorsEl ? errorsEl.querySelector('.form-edit-product-errors-list') : null;
-                            if (submitBtn) submitBtn.disabled = true;
-                            var formData = new FormData(form);
-                            fetch(form.action, {
-                                method: 'POST',
-                                body: formData,
-                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-                            }).then(function(res) {
-                                if (submitBtn) submitBtn.disabled = false;
-                                if (res.status === 422) {
-                                    return res.json().then(function(d) {
-                                        var messages = (d.errors && typeof d.errors === 'object') ? Object.values(d.errors).flat() : (d.message ? [d.message] : []);
-                                        if (errorsEl && listEl) {
-                                            listEl.innerHTML = messages.map(function(msg) { return '<li>' + String(msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>'; }).join('');
-                                            errorsEl.style.display = 'block';
-                                        }
-                                        if (typeof showAdminFlash === 'function' && messages.length) showAdminFlash(messages.join(' '), 'error');
-                                    });
-                                }
-                                if (!res.ok) return;
-                                return res.json().then(function(data) {
-                                    if (data.success && data.redirect) {
-                                        var m = bootstrap.Modal.getInstance(modalEditProduct);
-                                        if (m) m.hide();
-                                        if (window.adminLoadPage) window.adminLoadPage(data.redirect);
-                                        if (typeof showAdminFlash === 'function' && data.message) showAdminFlash(data.message, 'success');
-                                    }
-                                });
-                            }).catch(function() { if (submitBtn) submitBtn.disabled = false; });
-                        });
-                    }
-                })
-                .catch(function() {
-                    modalEditProductBody.innerHTML = '<p class="text-danger">Error al cargar el formulario.</p>';
-                });
         });
     }
 

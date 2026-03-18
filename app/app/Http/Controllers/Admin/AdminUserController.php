@@ -11,14 +11,23 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::orderBy('name')->paginate(10);
+        $query = User::orderBy('name');
+        $search = $request->filled('search') ? trim($request->input('search')) : null;
+        if ($search !== null && $search !== '') {
+            $term = '%'.$search.'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereRaw('LOWER(name) LIKE LOWER(?)', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE LOWER(?)', [$term]);
+            });
+        }
+        $users = $query->paginate(10)->withQueryString();
         $users->setPath(route('admin.users.index'));
 
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users', 'search'));
     }
 
     public function editForm(User $user)
@@ -92,6 +101,14 @@ class AdminUserController extends Controller
     public function destroy(Request $request, User $user)
     {
         $this->authorize('delete', $user);
+
+        if ($user->id === 1) {
+            $msg = 'No se puede eliminar el usuario con id 1.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->route('admin.users.index')->with('error', $msg);
+        }
 
         $user->delete();
 

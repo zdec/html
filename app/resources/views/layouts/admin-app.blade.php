@@ -203,6 +203,24 @@
     outline: none;
     border-color: #266bf9;
 }
+
+/* Buscador en cabecera (Clientes / Usuarios): misma línea que el título, ancho contenido */
+.admin-header-with-search { flex-wrap: nowrap !important; }
+.admin-header-with-search .header-right { flex-wrap: nowrap !important; flex: 1 1 auto; min-width: 0; justify-content: flex-end; }
+.admin-header-with-search .admin-search-form { flex: 0 0 auto; width: 220px; }
+.admin-header-with-search .admin-header-search-input { width: 100%; height: 44px; box-sizing: border-box; }
+@media (max-width: 767px) {
+    .admin-header-with-search { flex-wrap: wrap !important; }
+    .admin-header-with-search .admin-search-form { width: 100%; }
+}
+
+/* Evitar que el tema aplique capitalize a emails y nombres (tablas e inputs) */
+.account-dashboard .dashboard_content .table_page tbody td,
+.account-dashboard .dashboard_content .table tbody td,
+.account-dashboard .dashboard_content input[type="text"],
+.account-dashboard .dashboard_content input[type="email"] {
+    text-transform: none;
+}
 </style>
 @endpush
 
@@ -285,6 +303,21 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" id="adminConfirmModalConfirm">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Ver órdenes del cliente --}}
+<div class="modal fade" id="modalViewCustomerOrders" tabindex="-1" aria-labelledby="modalViewCustomerOrdersLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalViewCustomerOrdersLabel">Órdenes del cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" id="modalViewCustomerOrdersBody">
+                <div class="text-center text-muted py-4">Cargando…</div>
             </div>
         </div>
     </div>
@@ -378,6 +411,253 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('popstate', function(e) {
         if (e.state && e.state.adminUrl) loadAdminPage(e.state.adminUrl, false);
+    });
+
+    // Buscador Clientes/Usuarios: al escribir, actualizar tabla por AJAX sin recargar
+    var adminSearchDebounce = null;
+    if (contentEl) {
+        contentEl.addEventListener('input', function(e) {
+            if (!e.target || !e.target.classList || !e.target.classList.contains('admin-header-search-input')) return;
+            var wrapper = contentEl.querySelector('.admin-search-table-wrapper');
+            if (!wrapper) return;
+            var q = (e.target.value || '').trim();
+            clearTimeout(adminSearchDebounce);
+            adminSearchDebounce = setTimeout(function() {
+                var url = window.location.pathname + (q ? '?search=' + encodeURIComponent(q) : '');
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
+                    .then(function(r) { return r.text(); })
+                    .then(function(html) {
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(html, 'text/html');
+                        var newWrapper = doc.querySelector('.admin-search-table-wrapper');
+                        if (newWrapper && wrapper) {
+                            wrapper.innerHTML = newWrapper.innerHTML;
+                            if (window.history && window.history.replaceState) {
+                                window.history.replaceState({ adminUrl: url }, '', url);
+                            }
+                        }
+                    })
+                    .catch(function() {});
+            }, 300);
+        });
+    }
+
+    // Editar producto / usuario / cliente: abrir modal desde el layout para que funcione también tras carga AJAX (los @@push scripts no se re-ejecutan)
+    document.addEventListener('click', function(e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.product-edit-trigger') : null;
+        if (btn) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var url = btn.getAttribute('data-edit-form-url') || '';
+            var modal = document.getElementById('modalEditProduct');
+            if (modal && url) {
+                modal.setAttribute('data-current-edit-url', url);
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+            }
+            return;
+        }
+        btn = e.target && e.target.closest ? e.target.closest('.user-edit-trigger') : null;
+        if (btn) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var url = btn.getAttribute('data-edit-form-url') || '';
+            var modal = document.getElementById('modalEditUser');
+            if (modal && url) {
+                modal.setAttribute('data-current-edit-url', url);
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+            }
+            return;
+        }
+        btn = e.target && e.target.closest ? e.target.closest('.customer-edit-trigger') : null;
+        if (btn) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var url = btn.getAttribute('data-edit-form-url') || '';
+            var modal = document.getElementById('modalEditCustomer');
+            if (modal && url) {
+                modal.setAttribute('data-current-edit-url', url);
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+            }
+            return;
+        }
+        btn = e.target && e.target.closest ? e.target.closest('.customer-view-orders') : null;
+        if (btn) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var url = btn.getAttribute('data-customer-orders-url') || '';
+            var modal = document.getElementById('modalViewCustomerOrders');
+            if (modal && url) {
+                modal.setAttribute('data-current-orders-url', url);
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+            }
+        }
+    }, true);
+
+    document.addEventListener('show.bs.modal', function(e) {
+        if (!e.target) return;
+        if (e.target.id === 'modalEditProduct') {
+            var modal = e.target;
+            var url = modal.getAttribute('data-current-edit-url') || '';
+            var body = document.getElementById('modalEditProductBody');
+            if (!body || !url) {
+                if (body) body.innerHTML = '<p class="text-danger">No se pudo cargar el formulario.</p>';
+                return;
+            }
+            body.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    body.innerHTML = html;
+                    if (typeof initCurrencyInputs === 'function') initCurrencyInputs(body);
+                    var form = body.querySelector('#form-edit-product');
+                    var cancel = body.querySelector('.product-edit-form-cancel');
+                    if (cancel) cancel.addEventListener('click', function(ev) { ev.preventDefault(); var m = bootstrap.Modal.getInstance(modal); if (m) m.hide(); });
+                    if (form) {
+                        form.addEventListener('submit', function(ev) {
+                            ev.preventDefault();
+                            if (typeof unformatCurrencyForSubmit === 'function') unformatCurrencyForSubmit(form);
+                            var submitBtn = form.querySelector('button[type="submit"]');
+                            var errorsEl = body.querySelector('#form-edit-product-errors');
+                            var listEl = errorsEl ? errorsEl.querySelector('.form-edit-product-errors-list') : null;
+                            if (submitBtn) submitBtn.disabled = true;
+                            fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                                .then(function(res) {
+                                    if (submitBtn) submitBtn.disabled = false;
+                                    if (res.status === 422) {
+                                        return res.json().then(function(d) {
+                                            var messages = (d.errors && typeof d.errors === 'object') ? Object.values(d.errors).flat() : (d.message ? [d.message] : []);
+                                            if (errorsEl && listEl) { listEl.innerHTML = messages.map(function(msg) { return '<li>' + String(msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>'; }).join(''); errorsEl.style.display = 'block'; }
+                                            if (typeof showAdminFlash === 'function' && messages.length) showAdminFlash(messages.join(' '), 'error');
+                                        });
+                                    }
+                                    if (!res.ok) return;
+                                    return res.json().then(function(data) {
+                                        if (data.success && data.redirect) {
+                                            var m = bootstrap.Modal.getInstance(modal); if (m) m.hide();
+                                            if (window.adminLoadPage) window.adminLoadPage(data.redirect);
+                                            if (typeof showAdminFlash === 'function' && data.message) showAdminFlash(data.message, 'success');
+                                        }
+                                    });
+                                })
+                                .catch(function() { if (submitBtn) submitBtn.disabled = false; });
+                        });
+                    }
+                })
+                .catch(function() { body.innerHTML = '<p class="text-danger">Error al cargar el formulario.</p>'; });
+            return;
+        }
+        if (e.target.id === 'modalEditUser') {
+            var modal = e.target;
+            var url = modal.getAttribute('data-current-edit-url') || '';
+            var body = document.getElementById('modalEditUserBody');
+            if (!body || !url) {
+                if (body) body.innerHTML = '<p class="text-danger">No se pudo cargar el formulario.</p>';
+                return;
+            }
+            body.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    body.innerHTML = html;
+                    var form = body.querySelector('#form-edit-user');
+                    var cancel = body.querySelector('.user-edit-form-cancel');
+                    if (cancel) cancel.addEventListener('click', function(ev) { ev.preventDefault(); var m = bootstrap.Modal.getInstance(modal); if (m) m.hide(); });
+                    if (form) {
+                        form.addEventListener('submit', function(ev) {
+                            ev.preventDefault();
+                            var submitBtn = form.querySelector('button[type="submit"]');
+                            var errorsEl = body.querySelector('#form-edit-user-errors');
+                            var listEl = errorsEl ? errorsEl.querySelector('.form-edit-user-errors-list') : null;
+                            if (submitBtn) submitBtn.disabled = true;
+                            fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                                .then(function(res) {
+                                    if (submitBtn) submitBtn.disabled = false;
+                                    if (res.status === 422) {
+                                        return res.json().then(function(d) {
+                                            var messages = (d.errors && typeof d.errors === 'object') ? Object.values(d.errors).flat() : (d.message ? [d.message] : []);
+                                            if (errorsEl && listEl) { listEl.innerHTML = messages.map(function(msg) { return '<li>' + String(msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>'; }).join(''); errorsEl.style.display = 'block'; }
+                                            if (typeof showAdminFlash === 'function' && messages.length) showAdminFlash(messages.join(' '), 'error');
+                                        });
+                                    }
+                                    if (!res.ok) return;
+                                    return res.json().then(function(data) {
+                                        if (data.success && data.redirect) {
+                                            var m = bootstrap.Modal.getInstance(modal); if (m) m.hide();
+                                            if (window.adminLoadPage) window.adminLoadPage(data.redirect);
+                                            if (typeof showAdminFlash === 'function' && data.message) showAdminFlash(data.message, 'success');
+                                        }
+                                    });
+                                })
+                                .catch(function() { if (submitBtn) submitBtn.disabled = false; });
+                        });
+                    }
+                })
+                .catch(function() { body.innerHTML = '<p class="text-danger">Error al cargar el formulario.</p>'; });
+            return;
+        }
+        if (e.target.id === 'modalEditCustomer') {
+            var modal = e.target;
+            var url = modal.getAttribute('data-current-edit-url') || '';
+            var body = document.getElementById('modalEditCustomerBody');
+            if (!body || !url) {
+                if (body) body.innerHTML = '<p class="text-danger">No se pudo cargar el formulario.</p>';
+                return;
+            }
+            body.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
+                .then(function(r) { return r.text(); })
+                .then(function(html) {
+                    body.innerHTML = html;
+                    var form = body.querySelector('#form-edit-customer');
+                    var cancel = body.querySelector('.customer-edit-form-cancel');
+                    if (cancel) cancel.addEventListener('click', function(ev) { ev.preventDefault(); var m = bootstrap.Modal.getInstance(modal); if (m) m.hide(); });
+                    if (form) {
+                        form.addEventListener('submit', function(ev) {
+                            ev.preventDefault();
+                            var submitBtn = form.querySelector('button[type="submit"]');
+                            var errorsEl = body.querySelector('#form-edit-customer-errors');
+                            var listEl = errorsEl ? errorsEl.querySelector('.form-edit-customer-errors-list') : null;
+                            if (submitBtn) submitBtn.disabled = true;
+                            fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                                .then(function(res) {
+                                    if (submitBtn) submitBtn.disabled = false;
+                                    if (res.status === 422) {
+                                        return res.json().then(function(d) {
+                                            var messages = (d.errors && typeof d.errors === 'object') ? Object.values(d.errors).flat() : (d.message ? [d.message] : []);
+                                            if (errorsEl && listEl) { listEl.innerHTML = messages.map(function(msg) { return '<li>' + String(msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>'; }).join(''); errorsEl.style.display = 'block'; }
+                                            if (typeof showAdminFlash === 'function' && messages.length) showAdminFlash(messages.join(' '), 'error');
+                                        });
+                                    }
+                                    if (!res.ok) return;
+                                    return res.json().then(function(data) {
+                                        if (data.success && data.redirect) {
+                                            var m = bootstrap.Modal.getInstance(modal); if (m) m.hide();
+                                            if (window.adminLoadPage) window.adminLoadPage(data.redirect);
+                                            if (typeof showAdminFlash === 'function' && data.message) showAdminFlash(data.message, 'success');
+                                        }
+                                    });
+                                })
+                                .catch(function() { if (submitBtn) submitBtn.disabled = false; });
+                        });
+                    }
+                })
+                .catch(function() { body.innerHTML = '<p class="text-danger">Error al cargar el formulario.</p>'; });
+            return;
+        }
+        if (e.target.id === 'modalViewCustomerOrders') {
+            var modal = e.target;
+            var url = modal.getAttribute('data-current-orders-url') || '';
+            var body = document.getElementById('modalViewCustomerOrdersBody');
+            if (!body || !url) {
+                if (body) body.innerHTML = '<p class="text-danger">No se pudo cargar las órdenes.</p>';
+                return;
+            }
+            body.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
+                .then(function(r) { return r.text(); })
+                .then(function(html) { body.innerHTML = html; })
+                .catch(function() { body.innerHTML = '<p class="text-danger">Error al cargar las órdenes.</p>'; });
+        }
     });
 
     // Detalle orden: recalcular subtotales y total al cambiar cantidad (delegación para que funcione tras carga AJAX)
@@ -606,7 +886,17 @@ document.addEventListener('DOMContentLoaded', function() {
 (function() {
     function parseCurrency(val) {
         if (val === '' || val == null) return '';
-        var s = String(val).replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+        var s = String(val).replace(/\s/g, '');
+        var lastDot = s.lastIndexOf('.');
+        if (lastDot >= 0) {
+            var after = s.substring(lastDot + 1);
+            if (after.length === 2 && /^\d{2}$/.test(after)) {
+                s = s.substring(0, lastDot).replace(/\./g, '') + '.' + after;
+            } else {
+                s = s.replace(/\./g, '');
+            }
+        }
+        s = s.replace(',', '.');
         var n = parseFloat(s);
         return isNaN(n) ? '' : n;
     }
