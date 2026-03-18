@@ -780,18 +780,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // Enlaces dentro del contenido admin: cargar por AJAX para no recargar página
-    if (contentEl) {
-        contentEl.addEventListener('click', function(e) {
-            var a = e.target && e.target.closest ? e.target.closest('a') : null;
-            if (!a || !a.href || a.getAttribute('target') === '_blank' || a.hasAttribute('download')) return;
-            var path = getPath(a.href);
-            if (path.indexOf('/admin/') !== 0) return;
-            if (window.location.origin !== a.origin) return;
-            e.preventDefault();
-            loadAdminPage(a.href);
-        });
-    }
+    // Enlaces admin (contenido y modales): cargar por AJAX para no recargar página
+    document.addEventListener('click', function(e) {
+        var a = e.target && e.target.closest ? e.target.closest('a') : null;
+        if (!a || !a.href || a.getAttribute('target') === '_blank' || a.hasAttribute('download')) return;
+        if (a.id === 'admin-logout-link') return;
+        var path = getPath(a.href);
+        if (path.indexOf('/admin/') !== 0) return;
+        if (a.origin && a.origin !== window.location.origin) return;
+        e.preventDefault();
+        var inModal = a.closest && a.closest('.modal');
+        if (inModal) {
+            var bsModal = bootstrap.Modal.getInstance(inModal);
+            if (bsModal) bsModal.hide();
+        }
+        loadAdminPage(a.href);
+    });
 
     // Formularios .js-ajax-form: enviar por AJAX y actualizar contenido sin recargar (delegación para que funcione tras carga AJAX)
     document.addEventListener('submit', function(e) {
