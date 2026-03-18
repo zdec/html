@@ -60,7 +60,7 @@
                     <td class="fw-normal">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                     <td class="fw-normal">
                         @if ($order->customer)
-                            {{ $order->customer->name }} ({{ $order->customer_email_display }})
+                            {{ $order->customer->name }} {{ $order->customer_email_display }}
                         @else
                             {{ $order->customer_email_display }}
                         @endif

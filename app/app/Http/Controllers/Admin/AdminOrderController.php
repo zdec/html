@@ -37,6 +37,21 @@ class AdminOrderController extends Controller
     {
         $validated = $request->validated();
 
+        $emailNormalized = strtolower(trim($validated['customer_email']));
+        $customer = Customer::whereRaw('LOWER(email) = ?', [$emailNormalized])->first();
+        if (! $customer) {
+            $customer = Customer::create([
+                'email' => $emailNormalized,
+                'name' => null,
+                'phone' => $validated['customer_phone'] ?? null,
+                'user_id' => null,
+            ]);
+        } else {
+            if (empty($customer->phone) && ! empty($validated['customer_phone'])) {
+                $customer->update(['phone' => $validated['customer_phone']]);
+            }
+        }
+
         $total = 0;
         $orderItems = [];
 
@@ -54,9 +69,9 @@ class AdminOrderController extends Controller
         }
 
         $order = Order::create([
-            'customer_id' => null,
-            'email_guest' => $validated['customer_email'],
-            'phone_guest' => $validated['customer_phone'] ?? null,
+            'customer_id' => $customer->id,
+            'email_guest' => null,
+            'phone_guest' => null,
             'status' => Order::STATUS_PEDIDO,
             'total' => $total,
             'notes' => $validated['notes'] ?? null,
