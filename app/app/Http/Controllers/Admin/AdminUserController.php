@@ -15,9 +15,17 @@ class AdminUserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::orderBy('name')->paginate(20);
+        $users = User::orderBy('name')->paginate(10);
+        $users->setPath(route('admin.users.index'));
 
         return view('admin.users.index', compact('users'));
+    }
+
+    public function editForm(User $user)
+    {
+        $this->authorize('update', $user);
+
+        return view('admin.users.partials.form-edit', compact('user'));
     }
 
     public function create()

@@ -322,6 +322,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function cleanupModalBackdrop() {
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+        document.querySelectorAll('.modal-backdrop').forEach(function(el) { el.remove(); });
+    }
+
     function loadAdminPage(url, pushState) {
         if (!contentEl) return;
         var fullUrl = url.indexOf('http') === 0 ? url : (window.location.origin + (url.indexOf('/') === 0 ? url : '/' + url));
@@ -335,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var newTitle = doc.getElementById('admin-breadcrumb-title');
                 var newBreadcrumb = doc.getElementById('admin-breadcrumb');
                 if (newContent && contentEl) {
+                    cleanupModalBackdrop();
                     contentEl.innerHTML = newContent.innerHTML;
                     dismissAlertsAfter(contentEl, 5000);
                 }
@@ -451,6 +459,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Exponer para que filtros y otros enlaces del contenido puedan navegar sin recarga
     window.adminLoadPage = loadAdminPage;
+
+    // Evitar que quede modal-open o backdrop al cerrar (varios momentos por transiciones/timeouts de Bootstrap)
+    document.addEventListener('hidden.bs.modal', function() {
+        cleanupModalBackdrop();
+        setTimeout(cleanupModalBackdrop, 0);
+        setTimeout(cleanupModalBackdrop, 150);
+    });
 
     dismissAlertsAfter(contentEl, 5000);
 
