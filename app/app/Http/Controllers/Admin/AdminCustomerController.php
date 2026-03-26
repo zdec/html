@@ -33,6 +33,7 @@ class AdminCustomerController extends Controller
     public function editForm(Customer $customer)
     {
         $this->authorize('update', $customer);
+        $customer->loadMissing('user');
 
         return view('admin.customers.partials.form-edit', compact('customer'));
     }

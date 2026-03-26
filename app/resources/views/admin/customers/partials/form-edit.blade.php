@@ -10,7 +10,7 @@
         <div class="col-md-6 mb-3">
             <div class="default-form-box">
                 <label for="edit_name">Nombre</label>
-                <input type="text" name="name" id="edit_name" class="form-control" value="{{ old('name', $customer->name) }}">
+                <input type="text" name="name" id="edit_name" class="form-control" value="{{ old('name', $customer->name ?: ($customer->user->name ?? '')) }}">
             </div>
             @error('name')<div class="text-danger small">{{ $message }}</div>@enderror
         </div>
