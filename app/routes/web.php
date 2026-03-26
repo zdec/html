@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Api\ChatbotController;
+use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
@@ -20,6 +22,15 @@ Route::get('/catalogo', CatalogController::class)->name('catalog.index');
 Route::get('/favoritos', FavoritesController::class)->name('favorites.index');
 Route::get('/producto/{slug}', [ProductController::class, 'show'])->name('product.show');
 Route::get('/contacto', ContactController::class)->name('contact');
+
+Route::prefix('api')->group(function () {
+    Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('api.wishlist.toggle');
+    Route::get('/wishlist/current', [WishlistController::class, 'current'])->name('api.wishlist.current');
+    Route::post('/wishlist/sync', [WishlistController::class, 'sync'])->name('api.wishlist.sync');
+    Route::post('/chat/session/start-or-resume', [ChatbotController::class, 'startOrResume'])->name('api.chat.session.start');
+    Route::post('/chat/message', [ChatbotController::class, 'message'])->name('api.chat.message');
+    Route::post('/chat/confirm-order', [ChatbotController::class, 'confirmOrder'])->name('api.chat.confirm-order');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

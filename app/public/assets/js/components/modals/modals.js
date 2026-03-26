@@ -16,12 +16,38 @@ function loadModals() {
     function saveToWishlist(productId) {
         try {
             const stored = localStorage.getItem(WISHLIST_STORAGE_KEY);
-            const ids = stored ? JSON.parse(stored) : [];
-            if (!ids.includes(productId)) {
-                ids.push(productId);
+            let ids = stored ? JSON.parse(stored) : [];
+            const csrfToken = (typeof SiteConfig !== 'undefined' && SiteConfig.auth && SiteConfig.auth.csrfToken) ? SiteConfig.auth.csrfToken : '';
+
+            fetch('/api/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId })
+            }).then(function (r) {
+                return r.ok ? r.json() : null;
+            }).then(function (data) {
+                if (!data || !data.success) return;
+                if (data.liked) {
+                    if (!ids.includes(productId)) ids.push(productId);
+                } else {
+                    ids = ids.filter(function (id) { return id !== productId; });
+                }
                 localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(ids));
-            }
-            document.dispatchEvent(new CustomEvent('wishlist-updated'));
+                document.dispatchEvent(new CustomEvent('wishlist-updated', {
+                    detail: { productId: productId, liked: data.liked, count: data.count || ids.length }
+                }));
+            }).catch(function () {
+                if (!ids.includes(productId)) ids.push(productId);
+                localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(ids));
+                document.dispatchEvent(new CustomEvent('wishlist-updated', {
+                    detail: { productId: productId, liked: true, count: ids.length }
+                }));
+            });
         } catch (e) { /* localStorage no disponible */ }
     }
 

@@ -72,7 +72,21 @@ function loadOffcanvas() {
         try {
             const ids = getWishlistIds().filter(id => id !== productId);
             localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(ids));
+            const csrfToken = (typeof SiteConfig !== 'undefined' && SiteConfig.auth && SiteConfig.auth.csrfToken) ? SiteConfig.auth.csrfToken : '';
+            fetch('/api/wishlist/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId })
+            }).catch(function () {});
             renderWishlistOffcanvas();
+            document.dispatchEvent(new CustomEvent('wishlist-updated', {
+                detail: { productId: productId, liked: false, count: ids.length }
+            }));
         } catch (e) { /* localStorage no disponible */ }
     }
 

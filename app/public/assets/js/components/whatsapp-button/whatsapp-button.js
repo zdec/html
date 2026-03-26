@@ -15,21 +15,28 @@ function loadWhatsAppButton() {
     
     // Función para procesar e insertar el HTML
     function processAndInsertHTML(html) {
-        // Obtener el número de teléfono y limpiarlo (remover espacios, guiones, etc.)
+        // Mantener URL de fallback por si el chatbot aún no está inicializado
         const phoneNumber = SiteConfig.contact.phone.replace(/\s/g, '').replace(/-/g, '');
-        
-        // Crear el enlace de WhatsApp
-        // Formato: https://wa.me/[número]?text=[mensaje]
         const whatsappMessage = encodeURIComponent('Hola, me interesa conocer más sobre sus productos.');
         const whatsappURL = `https://wa.me/${phoneNumber}?text=${whatsappMessage}`;
-        
-        // Reemplazar el href del enlace
         let processedHTML = html.replace('href="#"', `href="${whatsappURL}"`);
         
         // Insertar el botón al final del body (antes del cierre de </body>)
         const body = document.querySelector('body');
         if (body) {
             body.insertAdjacentHTML('beforeend', processedHTML);
+            const link = document.getElementById('whatsapp-link');
+            if (link) {
+                link.addEventListener('click', function (e) {
+                    // Nuevo comportamiento: abrir el chat interno con sesión/contexto.
+                    if (typeof window.itsecursasOpenChatbot === 'function') {
+                        e.preventDefault();
+                        window.itsecursasOpenChatbot();
+                        return;
+                    }
+                    // Fallback natural: abrir WhatsApp externo si chat aún no existe.
+                });
+            }
         } else {
             console.error('No se encontró el elemento body para insertar el botón de WhatsApp');
         }

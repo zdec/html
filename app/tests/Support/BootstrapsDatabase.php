@@ -138,6 +138,35 @@ trait BootstrapsDatabase
             $table->string('reference')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('wishlist_items', function (Blueprint $table): void {
+            $table->id();
+            $table->string('session_id')->nullable()->index();
+            $table->string('guest_token')->nullable()->index();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->timestamps();
+        });
+
+        Schema::create('chat_sessions', function (Blueprint $table): void {
+            $table->id();
+            $table->string('session_id')->index();
+            $table->string('guest_token')->nullable()->index();
+            $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->string('channel')->default('web');
+            $table->string('status')->default('idle');
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('chat_messages', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('chat_session_id')->constrained('chat_sessions')->cascadeOnDelete();
+            $table->string('role');
+            $table->text('content');
+            $table->json('payload')->nullable();
+            $table->timestamps();
+        });
     }
 
     protected function truncateAllTables(): void
@@ -149,6 +178,9 @@ trait BootstrapsDatabase
             'inventory_movements',
             'order_items',
             'orders',
+            'chat_messages',
+            'chat_sessions',
+            'wishlist_items',
             'customers',
             'product_tag',
             'product_images',

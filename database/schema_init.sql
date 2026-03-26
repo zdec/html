@@ -1387,5 +1387,94 @@ ALTER TABLE ONLY public.sales_documents
 
 
 --
+-- Name: wishlist_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.wishlist_items (
+    id bigint NOT NULL,
+    session_id character varying(255),
+    guest_token character varying(255),
+    customer_id bigint,
+    product_id bigint NOT NULL,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+CREATE SEQUENCE public.wishlist_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.wishlist_items_id_seq OWNED BY public.wishlist_items.id;
+ALTER TABLE ONLY public.wishlist_items ALTER COLUMN id SET DEFAULT nextval('public.wishlist_items_id_seq'::regclass);
+ALTER TABLE ONLY public.wishlist_items ADD CONSTRAINT wishlist_items_pkey PRIMARY KEY (id);
+CREATE INDEX wishlist_items_session_id_index ON public.wishlist_items USING btree (session_id);
+CREATE INDEX wishlist_items_guest_token_index ON public.wishlist_items USING btree (guest_token);
+ALTER TABLE ONLY public.wishlist_items
+    ADD CONSTRAINT wishlist_items_customer_id_foreign FOREIGN KEY (customer_id) REFERENCES public.customers(id) ON DELETE SET NULL;
+ALTER TABLE ONLY public.wishlist_items
+    ADD CONSTRAINT wishlist_items_product_id_foreign FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE CASCADE;
+
+--
+-- Name: chat_sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chat_sessions (
+    id bigint NOT NULL,
+    session_id character varying(255) NOT NULL,
+    guest_token character varying(255),
+    customer_id bigint,
+    channel character varying(30) NOT NULL DEFAULT 'web',
+    status character varying(50) NOT NULL DEFAULT 'idle',
+    metadata json,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+CREATE SEQUENCE public.chat_sessions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.chat_sessions_id_seq OWNED BY public.chat_sessions.id;
+ALTER TABLE ONLY public.chat_sessions ALTER COLUMN id SET DEFAULT nextval('public.chat_sessions_id_seq'::regclass);
+ALTER TABLE ONLY public.chat_sessions ADD CONSTRAINT chat_sessions_pkey PRIMARY KEY (id);
+CREATE INDEX chat_sessions_session_id_index ON public.chat_sessions USING btree (session_id);
+CREATE INDEX chat_sessions_guest_token_index ON public.chat_sessions USING btree (guest_token);
+ALTER TABLE ONLY public.chat_sessions
+    ADD CONSTRAINT chat_sessions_customer_id_foreign FOREIGN KEY (customer_id) REFERENCES public.customers(id) ON DELETE SET NULL;
+
+--
+-- Name: chat_messages; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.chat_messages (
+    id bigint NOT NULL,
+    chat_session_id bigint NOT NULL,
+    role character varying(30) NOT NULL,
+    content text NOT NULL,
+    payload json,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+CREATE SEQUENCE public.chat_messages_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.chat_messages_id_seq OWNED BY public.chat_messages.id;
+ALTER TABLE ONLY public.chat_messages ALTER COLUMN id SET DEFAULT nextval('public.chat_messages_id_seq'::regclass);
+ALTER TABLE ONLY public.chat_messages ADD CONSTRAINT chat_messages_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.chat_messages
+    ADD CONSTRAINT chat_messages_chat_session_id_foreign FOREIGN KEY (chat_session_id) REFERENCES public.chat_sessions(id) ON DELETE CASCADE;
+
+--
 -- PostgreSQL database dump complete
 --

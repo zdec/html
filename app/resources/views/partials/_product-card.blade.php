@@ -30,7 +30,7 @@
             </a>
             <div class="actions">
                 <a href="{{ route('product.show', $product->slug) }}" class="action quickview" title="Vista rápida"><i class="pe-7s-look"></i></a>
-                <a href="#" class="action wishlist" title="Lista de deseos"><i class="pe-7s-like"></i></a>
+                <button type="button" class="action wishlist" data-product-id="{{ $product->id }}" title="Me gusta" data-bs-toggle="modal" data-bs-target="#exampleModal-Wishlist"><i class="pe-7s-like"></i></button>
             </div>
         </div>
         <div class="content">

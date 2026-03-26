@@ -460,7 +460,8 @@
     $.scrollUp({
         scrollText: '<i class="pe-7s-angle-up"></i>',
         easingType: "linear",
-        scrollSpeed: 900,
+        scrollSpeed: 280,
+        animationSpeed: 120,
         animation: "fade",
     });
     /*---------------------

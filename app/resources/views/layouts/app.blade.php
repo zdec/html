@@ -67,6 +67,7 @@
             products: { items: @json($productsForSearch ?? []) },
             auth: {
                 check: @json(auth()->check()),
+                email: @json(auth()->user()?->email),
                 logoutUrl: @json(route('logout')),
                 adminUrl: @json(route('admin.orders.index')),
                 csrfToken: document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : ''
@@ -89,6 +90,7 @@
     <script src="/assets/js/components/offcanvas/offcanvas.js"></script>
     <script src="/assets/js/components/footer/footer.js"></script>
     <script src="/assets/js/components/modals/modals.js"></script>
+    <script src="/assets/js/components/chatbot/chatbot-orchestrator.js"></script>
     @stack('scripts')
     <script src="/assets/js/components/components.js"></script>
     <script src="/assets/js/components/sliders-init.js"></script>
