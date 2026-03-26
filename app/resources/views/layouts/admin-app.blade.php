@@ -780,10 +780,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    // Enlaces admin (contenido y modales): cargar por AJAX para no recargar página
+    // Enlaces admin (contenido y modales): cargar por AJAX para no recargar página. Excepción: data-admin-ajax="false" o #.
     document.addEventListener('click', function(e) {
         var a = e.target && e.target.closest ? e.target.closest('a') : null;
         if (!a || !a.href || a.getAttribute('target') === '_blank' || a.hasAttribute('download')) return;
+        if (a.getAttribute('data-admin-ajax') === 'false') return;
         if (a.id === 'admin-logout-link') return;
         var path = getPath(a.href);
         if (path.indexOf('/admin/') !== 0) return;
