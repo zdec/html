@@ -49,11 +49,11 @@ class WishlistController extends Controller
     public function sync(Request $request)
     {
         $validated = $request->validate([
-            'product_ids' => ['required', 'array'],
+            'product_ids' => ['sometimes', 'array'],
             'product_ids.*' => ['integer', 'exists:products,id'],
         ]);
 
-        $sync = $this->wishlistService->sync($request, $validated['product_ids']);
+        $sync = $this->wishlistService->sync($request, $validated['product_ids'] ?? []);
         $listData = $this->wishlistService->list($request);
 
         $response = response()->json([

@@ -153,6 +153,7 @@ trait BootstrapsDatabase
             $table->string('session_id')->index();
             $table->string('guest_token')->nullable()->index();
             $table->foreignId('customer_id')->nullable()->constrained('customers')->nullOnDelete();
+            $table->string('ip_address', 45)->nullable();
             $table->string('channel')->default('web');
             $table->string('status')->default('idle');
             $table->json('metadata')->nullable();
@@ -164,8 +165,35 @@ trait BootstrapsDatabase
             $table->foreignId('chat_session_id')->constrained('chat_sessions')->cascadeOnDelete();
             $table->string('role');
             $table->text('content');
+            $table->string('ip_address', 45)->nullable();
             $table->json('payload')->nullable();
             $table->timestamps();
+        });
+
+        Schema::create('product_search_documents', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete()->unique();
+            $table->string('slug');
+            $table->string('title');
+            $table->string('category')->nullable();
+            $table->text('tags')->nullable();
+            $table->text('summary')->nullable();
+            $table->text('searchable_text');
+            $table->decimal('price', 12, 2);
+            $table->integer('stock')->default(0);
+            $table->boolean('active')->default(true)->index();
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('product_embeddings', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
+            $table->string('model', 100);
+            $table->json('embedding')->nullable();
+            $table->timestamp('updated_at_source')->nullable();
+            $table->timestamps();
+            $table->unique(['product_id', 'model']);
         });
     }
 
@@ -180,6 +208,8 @@ trait BootstrapsDatabase
             'orders',
             'chat_messages',
             'chat_sessions',
+            'product_embeddings',
+            'product_search_documents',
             'wishlist_items',
             'customers',
             'product_tag',

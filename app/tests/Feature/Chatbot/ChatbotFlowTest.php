@@ -3,6 +3,8 @@
 namespace Tests\Feature\Chatbot;
 
 use App\Mail\CustomerTemporaryPasswordMail;
+use App\Models\ChatMessage;
+use App\Models\ChatSession;
 use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use Illuminate\Support\Facades\Mail;
@@ -95,5 +97,62 @@ class ChatbotFlowTest extends TestCase
             'status' => Order::STATUS_PEDIDO,
         ]);
         Mail::assertQueued(OrderStatusMail::class);
+    }
+
+    public function test_chatbot_message_returns_intent_products_and_traceability_fields(): void
+    {
+        $product = $this->createProduct([
+            'name' => 'Telefono Empresarial',
+            'description' => 'Telefono de alto rendimiento',
+            'price' => 4500,
+        ]);
+
+        $this->postJson(route('api.chat.session.start'))->assertOk();
+
+        $session = ChatSession::latest('id')->first();
+        $this->assertNotNull($session);
+
+        $response = $this->postJson(route('api.chat.message'), [
+            'session_id' => $session->id,
+            'message' => 'quiero saber de telefonos',
+        ]);
+
+        $response->assertOk()
+            ->assertJson(['success' => true])
+            ->assertJsonStructure(['reply', 'intent', 'products', 'fallback_used']);
+
+        $session->refresh();
+        $this->assertNotNull($session->ip_address);
+
+        $botMessage = ChatMessage::where('chat_session_id', $session->id)->where('role', 'bot')->latest('id')->first();
+        $this->assertNotNull($botMessage);
+        $this->assertNotNull($botMessage->ip_address);
+        $this->assertNotEmpty(data_get($botMessage->payload, 'intent'));
+        $this->assertTrue(str_contains($botMessage->content, '/producto/' . $product->slug) || str_contains($botMessage->content, 'Te ayudo'));
+    }
+
+    public function test_chatbot_handles_out_of_scope_message_without_recommending_products(): void
+    {
+        $this->createProduct([
+            'name' => 'Antena Satelital Cobham BGAN',
+            'description' => 'Solucion satelital empresarial',
+            'price' => 5600,
+        ]);
+
+        $this->postJson(route('api.chat.session.start'))->assertOk();
+        $session = ChatSession::latest('id')->first();
+        $this->assertNotNull($session);
+
+        $response = $this->postJson(route('api.chat.message'), [
+            'session_id' => $session->id,
+            'message' => 'penes',
+        ]);
+
+        $response->assertOk()
+            ->assertJson(['success' => true]);
+
+        $reply = (string) $response->json('reply');
+        $this->assertStringContainsString('No tengo informacion al respecto', $reply);
+        $this->assertFalse(str_contains($reply, '/producto/'));
     }
 }

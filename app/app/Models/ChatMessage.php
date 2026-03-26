@@ -11,6 +11,7 @@ class ChatMessage extends Model
         'chat_session_id',
         'role',
         'content',
+        'ip_address',
         'payload',
     ];
 

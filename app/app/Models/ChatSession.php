@@ -12,6 +12,7 @@ class ChatSession extends Model
         'session_id',
         'guest_token',
         'customer_id',
+        'ip_address',
         'channel',
         'status',
         'metadata',

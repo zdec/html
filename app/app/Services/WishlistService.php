@@ -54,11 +54,13 @@ class WishlistService
 
         return [
             'items' => $items->map(function (WishlistItem $item) {
+            $coverImage = $item->product?->images?->first()?->path;
             return [
                 'id' => $item->product_id,
                 'title' => $item->product?->name,
                 'price' => $item->product ? '$' . number_format((float) $item->product->price, 0, ',', ',') : null,
                 'slug' => $item->product?->slug,
+                'image' => $coverImage,
             ];
         })->filter(fn ($row) => ! empty($row['id']))->values()->all(),
             'context' => $context,

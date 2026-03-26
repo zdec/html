@@ -1426,6 +1426,7 @@ CREATE TABLE public.chat_sessions (
     session_id character varying(255) NOT NULL,
     guest_token character varying(255),
     customer_id bigint,
+    ip_address character varying(45),
     channel character varying(30) NOT NULL DEFAULT 'web',
     status character varying(50) NOT NULL DEFAULT 'idle',
     metadata json,
@@ -1457,6 +1458,7 @@ CREATE TABLE public.chat_messages (
     chat_session_id bigint NOT NULL,
     role character varying(30) NOT NULL,
     content text NOT NULL,
+    ip_address character varying(45),
     payload json,
     created_at timestamp(0) without time zone,
     updated_at timestamp(0) without time zone
@@ -1474,6 +1476,70 @@ ALTER TABLE ONLY public.chat_messages ALTER COLUMN id SET DEFAULT nextval('publi
 ALTER TABLE ONLY public.chat_messages ADD CONSTRAINT chat_messages_pkey PRIMARY KEY (id);
 ALTER TABLE ONLY public.chat_messages
     ADD CONSTRAINT chat_messages_chat_session_id_foreign FOREIGN KEY (chat_session_id) REFERENCES public.chat_sessions(id) ON DELETE CASCADE;
+
+--
+-- Name: product_search_documents; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.product_search_documents (
+    id bigint NOT NULL,
+    product_id bigint NOT NULL,
+    slug character varying(255) NOT NULL,
+    title character varying(255) NOT NULL,
+    category character varying(255),
+    tags text,
+    summary text,
+    searchable_text text NOT NULL,
+    price numeric(12,2) NOT NULL,
+    stock integer DEFAULT 0 NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    metadata json,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+CREATE SEQUENCE public.product_search_documents_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.product_search_documents_id_seq OWNED BY public.product_search_documents.id;
+ALTER TABLE ONLY public.product_search_documents ALTER COLUMN id SET DEFAULT nextval('public.product_search_documents_id_seq'::regclass);
+ALTER TABLE ONLY public.product_search_documents ADD CONSTRAINT product_search_documents_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.product_search_documents
+    ADD CONSTRAINT product_search_documents_product_id_foreign FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE CASCADE;
+CREATE UNIQUE INDEX product_search_documents_product_id_unique ON public.product_search_documents USING btree (product_id);
+CREATE INDEX product_search_documents_active_index ON public.product_search_documents USING btree (active);
+
+--
+-- Name: product_embeddings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.product_embeddings (
+    id bigint NOT NULL,
+    product_id bigint NOT NULL,
+    model character varying(100) NOT NULL,
+    embedding json,
+    updated_at_source timestamp(0) without time zone,
+    created_at timestamp(0) without time zone,
+    updated_at timestamp(0) without time zone
+);
+
+CREATE SEQUENCE public.product_embeddings_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.product_embeddings_id_seq OWNED BY public.product_embeddings.id;
+ALTER TABLE ONLY public.product_embeddings ALTER COLUMN id SET DEFAULT nextval('public.product_embeddings_id_seq'::regclass);
+ALTER TABLE ONLY public.product_embeddings ADD CONSTRAINT product_embeddings_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.product_embeddings
+    ADD CONSTRAINT product_embeddings_product_id_foreign FOREIGN KEY (product_id) REFERENCES public.products(id) ON DELETE CASCADE;
+CREATE UNIQUE INDEX product_embeddings_product_model_unique ON public.product_embeddings USING btree (product_id, model);
 
 --
 -- PostgreSQL database dump complete

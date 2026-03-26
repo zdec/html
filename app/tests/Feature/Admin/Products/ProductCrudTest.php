@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin\Products;
 
 use App\Models\Product;
+use App\Models\ProductSearchDocument;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Tests\Support\CreatesAdminData;
@@ -120,5 +121,30 @@ class ProductCrudTest extends TestCase
         );
 
         $response->assertSessionHasErrors('image_main');
+    }
+
+    public function test_product_is_indexed_and_removed_from_knowledge_index(): void
+    {
+        $product = $this->createProduct([
+            'name' => 'Telefono Rugerizado',
+            'description' => 'Equipo resistente para campo',
+            'active' => true,
+        ]);
+
+        $this->assertDatabaseHas('product_search_documents', [
+            'product_id' => $product->id,
+            'slug' => $product->slug,
+            'active' => true,
+        ]);
+
+        $product->delete();
+
+        $this->assertDatabaseMissing('product_search_documents', [
+            'product_id' => $product->id,
+        ]);
+        $this->assertDatabaseMissing('product_embeddings', [
+            'product_id' => $product->id,
+        ]);
+        $this->assertNull(ProductSearchDocument::where('product_id', $product->id)->first());
     }
 }

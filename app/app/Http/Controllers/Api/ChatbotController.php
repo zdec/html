@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ChatMessage;
 use App\Models\ChatSession;
 use App\Services\ChatbotOrderService;
+use App\Services\ChatAssistantService;
 use App\Services\ChatContextService;
 use App\Services\WishlistService;
 use Illuminate\Http\Request;
@@ -16,7 +17,8 @@ class ChatbotController extends Controller
     public function __construct(
         private ChatContextService $chatContextService,
         private WishlistService $wishlistService,
-        private ChatbotOrderService $chatbotOrderService
+        private ChatbotOrderService $chatbotOrderService,
+        private ChatAssistantService $chatAssistantService
     ) {}
 
     public function startOrResume(Request $request)
@@ -35,40 +37,72 @@ class ChatbotController extends Controller
 
         $chatSession = ChatSession::firstOrCreate(
             $sessionLookup,
-            ['session_id' => $sessionId, 'guest_token' => $guestToken, 'customer_id' => $customerId, 'status' => 'collectingWishlistContext', 'metadata' => []]
+            [
+                'session_id' => $sessionId,
+                'guest_token' => $guestToken,
+                'customer_id' => $customerId,
+                'ip_address' => $request->ip(),
+                'status' => 'collectingWishlistContext',
+                'metadata' => [],
+            ]
         );
 
-        if (($customerId && ! $chatSession->customer_id) || ($guestToken && ! $chatSession->guest_token)) {
+        if ($customerId && $guestToken) {
+            ChatSession::where('guest_token', $guestToken)
+                ->whereNull('customer_id')
+                ->update(['customer_id' => $customerId]);
+        }
+
+        if (($customerId && ! $chatSession->customer_id) || ($guestToken && ! $chatSession->guest_token) || ! $chatSession->ip_address) {
             $chatSession->update([
                 'customer_id' => $customerId ?: $chatSession->customer_id,
                 'guest_token' => $guestToken ?: $chatSession->guest_token,
+                'ip_address' => $chatSession->ip_address ?: $request->ip(),
             ]);
         }
 
         $wishlistData = $this->wishlistService->list($request);
         $wishlist = $wishlistData['items'];
+        $history = ChatMessage::where('chat_session_id', $chatSession->id)
+            ->orderBy('id')
+            ->limit(80)
+            ->get()
+            ->map(fn (ChatMessage $message) => [
+                'role' => $message->role,
+                'content' => $message->content,
+            ])
+            ->values()
+            ->all();
         $message = count($wishlist) > 0
             ? 'Hola, vi que te interesan algunos productos. Si quieres, te ayudo a crear la orden de compra.'
             : 'Hola, estoy disponible para ayudarte con productos y órdenes.';
 
-        ChatMessage::create([
-            'chat_session_id' => $chatSession->id,
-            'role' => 'bot',
-            'content' => $message,
-            'payload' => ['wishlist_count' => count($wishlist)],
-        ]);
-        Log::info('chatbot.session.prompted', [
-            'chat_session_id' => $chatSession->id,
-            'wishlist_count' => count($wishlist),
-            'customer_id' => $customerId,
-            'session_id' => $sessionId,
-        ]);
+        if (count($history) === 0) {
+            ChatMessage::create([
+                'chat_session_id' => $chatSession->id,
+                'role' => 'bot',
+                'content' => $message,
+                'ip_address' => $request->ip(),
+                'payload' => ['wishlist_count' => count($wishlist)],
+            ]);
+            Log::info('chatbot.session.prompted', [
+                'chat_session_id' => $chatSession->id,
+                'wishlist_count' => count($wishlist),
+                'customer_id' => $customerId,
+                'session_id' => $sessionId,
+            ]);
+            $history[] = [
+                'role' => 'bot',
+                'content' => $message,
+            ];
+        }
 
         $response = response()->json([
             'success' => true,
             'session_id' => $chatSession->id,
             'message' => $message,
             'wishlist' => $wishlist,
+            'history' => $history,
         ]);
 
         return $this->chatContextService->withGuestCookie($response, $context);
@@ -83,38 +117,45 @@ class ChatbotController extends Controller
 
         $chatSession = ChatSession::findOrFail($validated['session_id']);
         $content = trim($validated['message']);
+        $context = $this->chatContextService->resolve($request);
+
+        $chatSession->update([
+            'customer_id' => $chatSession->customer_id ?: ($context['customer_id'] ?? null),
+            'guest_token' => $chatSession->guest_token ?: ($context['guest_token'] ?? null),
+            'ip_address' => $chatSession->ip_address ?: $request->ip(),
+        ]);
 
         ChatMessage::create([
             'chat_session_id' => $chatSession->id,
             'role' => 'user',
             'content' => $content,
+            'ip_address' => $request->ip(),
             'payload' => [],
         ]);
 
-        $normalized = mb_strtolower($content);
-        if (str_contains($normalized, 'tiempo de entrega') || str_contains($normalized, 'entrega') || str_contains($normalized, 'envio')) {
-            $botReply = 'Cuando crees la orden, un asesor se comunicara contigo para darte las indicaciones de tiempos de entrega y despacho.';
-        } elseif (str_contains($normalized, 'orden') || str_contains($normalized, 'comprar')) {
-            $botReply = 'Perfecto. Para crear la orden, usa el boton de confirmar orden y yo me encargo del proceso.';
-        } elseif (str_contains($normalized, 'producto') || str_contains($normalized, 'detalle') || str_contains($normalized, 'informacion')) {
-            $botReply = 'Puedo ayudarte con informacion de los productos que marcaste en me gusta. Si quieres, te ayudo a crear la orden directamente.';
-        } else {
-            $botReply = 'Entendido. Te acompano en la compra: puedo resolver dudas de producto o crear la orden cuando me confirmes.';
-        }
+        $assistantResult = $this->chatAssistantService->reply($chatSession, $content);
+        $botReply = $assistantResult['reply'];
 
         ChatMessage::create([
             'chat_session_id' => $chatSession->id,
             'role' => 'bot',
             'content' => $botReply,
-            'payload' => [],
+            'ip_address' => $request->ip(),
+            'payload' => [
+                'intent' => $assistantResult['intent'],
+                'products' => $assistantResult['products'],
+                'fallback_used' => $assistantResult['fallback_used'],
+                'llm_used' => $assistantResult['llm_used'],
+            ],
         ]);
 
         $response = response()->json([
             'success' => true,
             'reply' => $botReply,
+            'intent' => $assistantResult['intent'],
+            'products' => $assistantResult['products'],
+            'fallback_used' => $assistantResult['fallback_used'],
         ]);
-
-        $context = $this->chatContextService->resolve($request);
 
         return $this->chatContextService->withGuestCookie($response, $context);
     }
@@ -127,6 +168,12 @@ class ChatbotController extends Controller
         ]);
 
         $chatSession = ChatSession::findOrFail($validated['session_id']);
+        $context = $this->chatContextService->resolve($request);
+        $chatSession->update([
+            'customer_id' => $chatSession->customer_id ?: ($context['customer_id'] ?? null),
+            'guest_token' => $chatSession->guest_token ?: ($context['guest_token'] ?? null),
+            'ip_address' => $chatSession->ip_address ?: $request->ip(),
+        ]);
         $order = $this->chatbotOrderService->createFromWishlist($request, $validated['email'] ?? null);
         if (! $order) {
             return response()->json([
@@ -136,10 +183,12 @@ class ChatbotController extends Controller
         }
 
         $chatSession->update(['status' => 'orderConfirmed']);
+        $followupMessage = 'Listo, tu orden #' . $order->id . ' fue creada y te enviamos un correo para seguimiento. Para ver el estado y trazabilidad, entra por Mi cuenta: /login';
         ChatMessage::create([
             'chat_session_id' => $chatSession->id,
             'role' => 'bot',
-            'content' => 'Listo, tu orden #' . $order->id . ' fue creada y te enviamos un correo para seguimiento.',
+            'content' => $followupMessage,
+            'ip_address' => $request->ip(),
             'payload' => ['order_id' => $order->id],
         ]);
         Log::info('chatbot.order.confirmed', [
@@ -151,10 +200,8 @@ class ChatbotController extends Controller
         $response = response()->json([
             'success' => true,
             'order_id' => $order->id,
-            'message' => 'Orden creada correctamente desde el chatbot.',
+            'message' => $followupMessage,
         ]);
-
-        $context = $this->chatContextService->resolve($request);
 
         return $this->chatContextService->withGuestCookie($response, $context);
     }
