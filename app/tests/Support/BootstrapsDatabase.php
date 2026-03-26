@@ -8,13 +8,14 @@ use Illuminate\Database\Schema\Blueprint;
 
 trait BootstrapsDatabase
 {
-    protected static bool $schemaReady = false;
-
     protected function bootstrapTestDatabase(): void
     {
-        if (! static::$schemaReady) {
+        if (DB::getDriverName() !== 'sqlite') {
+            throw new \RuntimeException('Los tests deben ejecutarse en SQLite en memoria.');
+        }
+
+        if (! Schema::hasTable('users')) {
             $this->createSchema();
-            static::$schemaReady = true;
         }
 
         $this->truncateAllTables();

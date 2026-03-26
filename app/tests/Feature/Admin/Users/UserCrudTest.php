@@ -32,7 +32,6 @@ class UserCrudTest extends TestCase
 
     public function test_admin_cannot_delete_user_with_id_one(): void
     {
-        $admin = $this->createUser(true, ['id' => 99, 'email' => 'admin99@test.local']);
         DB::table('users')->insert([
             'id' => 1,
             'name' => 'Root',
@@ -42,6 +41,7 @@ class UserCrudTest extends TestCase
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        $admin = $this->createUser(true, ['email' => 'admin99@test.local']);
 
         $response = $this->actingAs($admin)->delete(route('admin.users.destroy', ['user' => 1]), [], [
             'X-Requested-With' => 'XMLHttpRequest',
