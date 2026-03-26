@@ -136,11 +136,86 @@
     opacity: 1;
     filter: none;
 }
+#productViewModal .admin-quickview-gallery-top .swiper-slide img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+}
+#productViewModal .admin-quickview-gallery-thumbs .swiper-slide {
+    cursor: pointer;
+    opacity: .85;
+}
+#productViewModal .admin-quickview-gallery-thumbs .swiper-slide img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+}
 </style>
 
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    var viewModal = document.getElementById('productViewModal');
+    var viewBody = document.getElementById('productViewModalBody');
+    var viewModalInstance = viewModal ? bootstrap.Modal.getOrCreateInstance(viewModal) : null;
+    var currentViewRequest = null;
+
+    function initAdminQuickviewSlider(scopeEl) {
+        if (typeof Swiper === 'undefined' || !scopeEl) return;
+
+        var galleryTopEl = scopeEl.querySelector('.admin-quickview-gallery-top');
+        var galleryThumbsEl = scopeEl.querySelector('.admin-quickview-gallery-thumbs');
+        if (!galleryTopEl || !galleryThumbsEl) return;
+
+        if (galleryTopEl.swiper) galleryTopEl.swiper.destroy(true, true);
+        if (galleryThumbsEl.swiper) galleryThumbsEl.swiper.destroy(true, true);
+
+        var thumbsSwiper = new Swiper(galleryThumbsEl, {
+            spaceBetween: 10,
+            slidesPerView: 3,
+            freeMode: true,
+            watchSlidesVisibility: true,
+            watchSlidesProgress: true,
+            navigation: {
+                nextEl: galleryThumbsEl.querySelector('.swiper-button-next'),
+                prevEl: galleryThumbsEl.querySelector('.swiper-button-prev')
+            }
+        });
+
+        new Swiper(galleryTopEl, {
+            spaceBetween: 0,
+            loop: false,
+            slidesPerView: 1,
+            thumbs: { swiper: thumbsSwiper }
+        });
+    }
+
+    function loadProductViewModal(url) {
+        if (!viewModal || !viewBody || !url) return;
+
+        if (currentViewRequest && typeof currentViewRequest.abort === 'function') {
+            currentViewRequest.abort();
+        }
+        currentViewRequest = new AbortController();
+
+        viewBody.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+        if (viewModalInstance) viewModalInstance.show();
+
+        fetch(url, {
+            signal: currentViewRequest.signal,
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }
+        })
+            .then(function(r) { return r.text(); })
+            .then(function(html) {
+                viewBody.innerHTML = html;
+                setTimeout(function() { initAdminQuickviewSlider(viewBody); }, 80);
+            })
+            .catch(function(err) {
+                if (err && err.name === 'AbortError') return;
+                viewBody.innerHTML = '<p class="text-danger">Error al cargar el producto.</p>';
+            });
+    }
+
     var modalCreateProduct = document.getElementById('modalCreateProduct');
     var formCreate = document.getElementById('form-create-product');
     if (modalCreateProduct && formCreate && modalCreateProduct.contains(formCreate)) {
@@ -189,24 +264,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    var viewModal = document.getElementById('productViewModal');
-    var viewBody = document.getElementById('productViewModalBody');
-    document.querySelectorAll('.view-product-modal').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var url = this.getAttribute('data-product-modal-url');
-            viewBody.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
-            var modal = new bootstrap.Modal(viewModal);
-            modal.show();
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' } })
-                .then(function(r) { return r.text(); })
-                .then(function(html) {
-                    viewBody.innerHTML = html;
-                })
-                .catch(function() {
-                    viewBody.innerHTML = '<p class="text-danger">Error al cargar el producto.</p>';
-                });
-        });
+    document.addEventListener('click', function(e) {
+        var trigger = e.target && e.target.closest ? e.target.closest('.view-product-modal') : null;
+        if (!trigger) return;
+        e.preventDefault();
+        e.stopPropagation();
+        loadProductViewModal(trigger.getAttribute('data-product-modal-url'));
     });
 
 });
