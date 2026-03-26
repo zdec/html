@@ -12,8 +12,8 @@ return [
 
 
     'contact' => [
-        'phone' => env('SITE_PHONE', '+57 310 6707901'),
-        'phone_formatted' => env('SITE_PHONE_FORMATTED', '+57 310 6707901'),
+        'phone' => env('SITE_PHONE', '+57 320 5523491'),
+        'phone_formatted' => env('SITE_PHONE_FORMATTED', '+57 320 5523491'),
         'email' => env('SITE_EMAIL', 'ventas@itsecursas.co'),
         'address' => env('SITE_ADDRESS', 'Cra 32 # 77 S 371'),
         'city' => env('SITE_CITY', 'Medellín, Colombia'),

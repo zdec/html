@@ -5,8 +5,8 @@
 const SiteConfig = {
     // Información de contacto
     contact: {
-        phone: "+57 310 6707901",
-        phoneFormatted: "+57 310 6707901",
+        phone: "+57 320 5523491",
+        phoneFormatted: "+57 320 5523491",
         email: "ventas@itsecursas.co",
         address: "Cra 32 # 77 S 371",
         city: "Medellín, Colombia",

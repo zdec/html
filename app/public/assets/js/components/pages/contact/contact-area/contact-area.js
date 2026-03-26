@@ -20,7 +20,7 @@ function loadContactArea() {
         const address = contact.address && contact.city 
             ? `${contact.city}<br>${contact.address}` 
             : (contact.address || "Medellin, Colombia Cra 32 # 77 S 371");
-        const phone = contact.phone || "+57 310 6707901";
+        const phone = contact.phone || "+57 320 5523491";
         const email = contact.email || "ventas@itsecursas.co";
         const web = contact.website || "https://itsecursas.co/";
         
