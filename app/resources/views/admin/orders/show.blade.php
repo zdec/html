@@ -16,7 +16,19 @@
     <div class="col-md-6">
         <p class="mb-0"><strong>Consecutivo:</strong> {{ $order->id }}</p>
         <p class="mb-0"><strong>Fecha:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
-        <p class="mb-0"><strong>Cliente:</strong> @if ($order->customer){{ $order->customer->name }} {{ strtolower($order->customer->email) }}@else {{ $order->email_guest ? strtolower($order->email_guest) : '—' }}@endif</p>
+        <p class="mb-0">
+            <strong>Cliente:</strong>
+            @if ($order->customer)
+                @if (!empty($order->customer->name))
+                    {{ $order->customer->name }}
+                    <br><small class="text-muted">{{ strtolower($order->customer->email) }}</small>
+                @else
+                    {{ strtolower($order->customer->email) }}
+                @endif
+            @else
+                {{ $order->email_guest ? strtolower($order->email_guest) : '—' }}
+            @endif
+        </p>
     </div>
     <div class="col-md-6">
         <p class="mb-0"><strong>Teléfono:</strong> @if ($order->customer){{ $order->customer->phone ?? '—' }}@else {{ $order->phone_guest ?? '—' }}@endif</p>

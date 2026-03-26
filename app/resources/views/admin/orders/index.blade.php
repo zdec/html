@@ -20,6 +20,7 @@
 .order-actions-delete:hover { text-decoration: none !important; color: #fff !important; }
 .order-product-search-wrap.search-element { max-width: none; width: 100%; margin: 0; }
 .order-product-search-wrap .search-results { width: 100%; left: 0; right: 0; }
+.order-customer-email { color: #6c757d; font-size: 0.85rem; line-height: 1.2; display: block; margin-top: 2px; text-transform: none; }
 </style>
 @endpush
 
@@ -60,7 +61,12 @@
                     <td class="fw-normal">{{ $order->created_at->format('d/m/Y H:i') }}</td>
                     <td class="fw-normal">
                         @if ($order->customer)
-                            {{ $order->customer->name }} {{ $order->customer_email_display }}
+                            @if (!empty($order->customer->name))
+                                {{ $order->customer->name }}
+                                <span class="order-customer-email">{{ $order->customer_email_display }}</span>
+                            @else
+                                {{ $order->customer_email_display }}
+                            @endif
                         @else
                             {{ $order->customer_email_display }}
                         @endif
