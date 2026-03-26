@@ -8,7 +8,7 @@
 
 @section('admin_content')
 <div class="modal fade show" id="forcePasswordModal" tabindex="-1" aria-labelledby="forcePasswordModalLabel" aria-modal="true" role="dialog" style="display:block;">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="forcePasswordModalLabel">Debes cambiar tu contraseña</h5>
