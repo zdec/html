@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FavoritesController;
+use App\Http\Controllers\ForcedPasswordChangeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,10 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/password/force-change', [ForcedPasswordChangeController::class, 'edit'])->name('password.force-change.edit');
+    Route::put('/password/force-change', [ForcedPasswordChangeController::class, 'update'])->name('password.force-change.update');
 
-    Route::prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware('password.changed')->group(function () {
         // Órdenes: listado y detalle para todos (filtrado en controlador); crear y flujo solo admin
         Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('orders/create', [AdminOrderController::class, 'create'])->name('orders.create')->middleware('admin');
@@ -38,6 +41,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy')->middleware('admin');
         Route::post('orders/{order}/remision', [AdminOrderController::class, 'generateRemision'])->name('orders.generate-remision')->middleware('admin');
         Route::post('orders/{order}/venta', [AdminOrderController::class, 'registerVenta'])->name('orders.register-venta')->middleware('admin');
+        Route::post('orders/{order}/cancel', [AdminOrderController::class, 'cancel'])->name('orders.cancel')->middleware('admin');
+        Route::post('orders/{order}/resend-email', [AdminOrderController::class, 'resendEmail'])->name('orders.resend-email');
 
         // Perfil: todos
         Route::get('perfil', [ProfileController::class, 'edit'])->name('profile.edit');

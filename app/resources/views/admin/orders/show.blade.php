@@ -111,6 +111,10 @@
 @endif
 
 <div class="d-flex flex-wrap gap-2 align-items-center">
+    <form method="POST" action="{{ route('admin.orders.resend-email', $order) }}" class="d-inline js-ajax-form">
+        @csrf
+        <button type="submit" class="btn btn-outline-dark">Reenviar correo</button>
+    </form>
     @if ($canEdit)
         <button type="submit" form="order-update-form" class="btn btn-dark btn-hover-primary">Actualizar cantidades</button>
     @endif
@@ -127,12 +131,18 @@
                 <button type="submit" class="btn btn-dark btn-hover-primary">Registrar venta</button>
             </form>
         @endif
+        @if (in_array($order->status, ['draft', 'pedido', 'remision']))
+            <form method="POST" action="{{ route('admin.orders.cancel', $order) }}" class="d-inline js-ajax-form" data-confirm="¿Cancelar esta orden?">
+                @csrf
+                <button type="submit" class="btn btn-danger">Anular</button>
+            </form>
+        @endif
     @endif
     @if ($canEdit)
         <form method="POST" action="{{ route('admin.orders.destroy', $order) }}" class="d-inline" data-confirm="¿Eliminar esta orden? No se puede deshacer." data-ajax-delete="1">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-danger">Eliminar orden</button>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
         </form>
     @endif
     <a href="{{ route('admin.orders.index') }}" class="btn btn-outline-dark">Volver a órdenes</a>

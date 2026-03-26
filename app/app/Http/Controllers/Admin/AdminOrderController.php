@@ -7,13 +7,17 @@ use App\Http\Requests\Admin\StoreOrderRequest;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\CustomerAccessProvisioningService;
+use App\Services\OrderNotificationService;
 use App\Services\OrderFlowService;
 use Illuminate\Http\Request;
 
 class AdminOrderController extends Controller
 {
     public function __construct(
-        private OrderFlowService $orderFlowService
+        private OrderFlowService $orderFlowService,
+        private CustomerAccessProvisioningService $customerAccessProvisioningService,
+        private OrderNotificationService $orderNotificationService
     ) {}
 
     public function create()
@@ -52,6 +56,8 @@ class AdminOrderController extends Controller
             }
         }
 
+        $this->customerAccessProvisioningService->ensureCustomerCanLogin($customer);
+
         $total = 0;
         $orderItems = [];
 
@@ -82,6 +88,8 @@ class AdminOrderController extends Controller
         foreach ($orderItems as $item) {
             $order->items()->create($item);
         }
+
+        $this->orderNotificationService->notifyOrderCreated($order->fresh(['customer', 'items.product']));
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -193,6 +201,48 @@ class AdminOrderController extends Controller
         }
 
         return back()->with('success', 'Venta registrada correctamente.');
+    }
+
+    public function cancel(Request $request, Order $order)
+    {
+        $this->authorize('update', $order);
+
+        if (! in_array($order->status, [Order::STATUS_DRAFT, Order::STATUS_PEDIDO, Order::STATUS_REMISION], true)) {
+            $msg = 'No se puede cancelar una orden en este estado.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
+        $this->orderFlowService->cancelOrder($order->fresh(['items.product', 'inventoryMovements.product']));
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.show', $order), 'message' => 'Orden cancelada correctamente.']);
+        }
+
+        return back()->with('success', 'Orden cancelada correctamente.');
+    }
+
+    public function resendEmail(Request $request, Order $order)
+    {
+        $this->authorize('view', $order);
+
+        $sent = $this->orderNotificationService->resendCurrentStatus($order->fresh(['customer', 'items.product']));
+        if (! $sent) {
+            $msg = 'No se pudo enviar el correo porque la orden no tiene email asociado.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'redirect' => route('admin.orders.show', $order), 'message' => 'Correo reenviado correctamente.']);
+        }
+
+        return back()->with('success', 'Correo reenviado correctamente.');
     }
 
     /**

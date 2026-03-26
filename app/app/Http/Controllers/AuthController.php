@@ -30,6 +30,10 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()?->must_change_password) {
+            return redirect()->route('password.force-change.edit');
+        }
+
         return redirect()->intended(route('admin.orders.index'));
     }
 

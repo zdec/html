@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class OrderFlowService
 {
+    public function __construct(
+        private OrderNotificationService $orderNotificationService
+    ) {}
+
     /**
      * Generar remisión: descuenta stock si stock > 0 y crea inventory_movements.
      */
@@ -33,6 +37,8 @@ class OrderFlowService
 
             $order->update(['status' => Order::STATUS_REMISION]);
         });
+
+        $this->orderNotificationService->notifyStatusChanged($order->fresh(['customer', 'items.product']), Order::STATUS_REMISION);
     }
 
     /**
@@ -73,5 +79,24 @@ class OrderFlowService
 
             $order->update(['status' => Order::STATUS_VENTA]);
         });
+
+        $this->orderNotificationService->notifyStatusChanged($order->fresh(['customer', 'items.product']), Order::STATUS_VENTA);
+    }
+
+    public function cancelOrder(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            if ($order->status === Order::STATUS_REMISION) {
+                foreach ($order->inventoryMovements as $movement) {
+                    if ($movement->quantity < 0) {
+                        $movement->product->increment('stock', abs($movement->quantity));
+                    }
+                }
+            }
+
+            $order->update(['status' => Order::STATUS_CANCELLED]);
+        });
+
+        $this->orderNotificationService->notifyStatusChanged($order->fresh(['customer', 'items.product']), Order::STATUS_CANCELLED);
     }
 }
