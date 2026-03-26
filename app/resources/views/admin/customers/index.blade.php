@@ -33,7 +33,7 @@
         <tbody>
             @forelse ($customers as $customer)
                 <tr>
-                    <td class="fw-normal">{{ $customer->name ?? '—' }}</td>
+                    <td class="fw-normal">{{ $customer->name ?: ($customer->user->name ?? '—') }}</td>
                     <td class="fw-normal">{{ $customer->email }}</td>
                     <td class="fw-normal">{{ $customer->phone ?? '—' }}</td>
                     <td class="fw-normal">{{ $customer->city ?? '—' }}</td>

@@ -34,7 +34,13 @@ class ProfileController extends Controller
         $user->save();
 
         if ($user->customer) {
-            $user->customer->update($request->only('phone', 'address', 'city'));
+            $user->customer->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'city' => $validated['city'] ?? null,
+            ]);
         }
 
         if ($request->expectsJson() || $request->ajax()) {

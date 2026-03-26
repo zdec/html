@@ -55,7 +55,16 @@ class AdminCustomerController extends Controller
 
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        $customer->update($request->validated());
+        $validated = $request->validated();
+
+        $customer->update($validated);
+
+        if ($customer->user) {
+            $customer->user->update([
+                'name' => $validated['name'] ?? $customer->user->name,
+                'email' => $validated['email'],
+            ]);
+        }
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
