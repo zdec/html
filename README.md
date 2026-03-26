@@ -87,6 +87,40 @@ El script `docker-dev.sh` ejecuta `docker compose up` y muestra la URL de acceso
 
 Uso: `./docker-dev.sh` o `bash docker-dev.sh`
 
+## Pruebas automatizadas (Admin)
+
+Se implementó una suite de pruebas automatizadas para el área administrativa, cubriendo:
+
+- Login y logout
+- Órdenes
+- Productos
+- Usuarios
+- Clientes
+- Perfil
+- Policies y flujo de órdenes (`OrderFlowService`)
+
+### Ejecutar pruebas en Docker
+
+```bash
+docker compose exec app php artisan test
+```
+
+### Ejecutar por suite
+
+```bash
+docker compose exec app php artisan test tests/Feature
+docker compose exec app php artisan test tests/Unit
+```
+
+### Ejecutar por módulo (ejemplos)
+
+```bash
+docker compose exec app php artisan test tests/Feature/Admin/Products/ProductCrudTest.php
+docker compose exec app php artisan test tests/Feature/Admin/Orders/OrderCrudTest.php
+```
+
+Para ver el detalle de cobertura y criterios de éxito por módulo, revisar `app/docs/testing-admin.md`.
+
 ## Producción / despliegue
 
 - **Imágenes de productos:** Se guardan en `storage/app/public/products/`. Es necesario ejecutar `php artisan storage:link` para que la ruta `public/storage` apunte a ese directorio (en Docker: `docker compose exec app php artisan storage:link`).
