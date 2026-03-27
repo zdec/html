@@ -7,8 +7,8 @@
     <title>@yield('title', 'IT Secur')</title>
     <meta name="robots" content="index, follow" />
     <meta name="description" content="@yield('description', 'IT Secur - Tienda en línea de articulos de seguridad')">
-    <link rel="shortcut icon" href="/assets/images/logo/icono.png" type="image/png">
-    <link rel="icon" href="/assets/images/logo/icono.png" type="image/png">
+    <link rel="icon" href="{{ asset('assets/images/logo/icono.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
 
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/assets/css/font.awesome.css" />

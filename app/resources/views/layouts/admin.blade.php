@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin') - IT Secur</title>
+    <link rel="icon" href="{{ asset('assets/images/logo/icono.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
 </head>
 <body>
